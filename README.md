@@ -1,41 +1,49 @@
-The sidebar styling is NOT taking effect. Fix this by forcing a ROOT-LEVEL style override and applying it to the exact sidebar widgets.
+Update the left sidebar UX.
 
-Do NOT change logic.
-Do NOT change layout structure.
-Only enforce styling + ensure it applies.
+Do NOT change workflow logic.
+Do NOT refactor architecture.
+Only update sidebar rendering + bot_library.json schema + filter UI.
 
-MANDATORY:
-1) Identify the exact widget class used for BOT rows (Listbox / Treeview / Frame rows / QListWidget / QTreeView).
-2) Apply styles to THAT widget and its item delegates (not a parent container only).
-3) Apply the stylesheet/theme at the ROOT application level (App/Window) so children inherit it.
-4) Remove ALL opacity/alpha usage. Use solid colors only. No “light tint”, no transparency.
+Requirements:
 
-STYLE TARGET (must be visible):
-- Sidebar bg: #F9FAFB
-- Selected row bg: #E0EAFF (solid)
-- Hover bg: #EEF2FF (solid)
-- Left selection bar: 4px solid #2563EB (must be clearly visible)
-- Badge: 24px, radius 8px, bg #2563EB (solid), text white bold
+1) Rename
+- Rename sidebar title from "BOT Library" to "Collection".
 
-ENFORCE:
-- Fixed row height: 48px
-- Padding: 12px
-- Badge→text gap: 10px
-- Title: #111827, font-weight 600
-- Desc: #4B5563, 1-line ellipsis
+2) Data model (JSON-driven)
+- Update bot_library.json so each item includes:
+  - id
+  - display_name
+  - short_description
+  - type  // "BOT" or "API" (required)
+  - category (optional)
+  - inputs[] (optional)
+  - outputs[] (optional)
 
-VERIFICATION (required in code):
-- Add a temporary debug log/print confirming the style is applied (e.g., stylesheet length > 0 or style object assigned).
-- If the widget is QTreeView/QListView, implement a custom delegate to paint:
-  - hover background
-  - selected background
-  - left accent bar
-  - badge rectangle + letter
-  (Do NOT rely on default item rendering)
+3) Two content types
+- The Collection must show both BOT and API items, mixed in one list by default.
 
-OUTPUT:
-Return ONLY the final code changes that:
-- apply root-level styling
-- correctly style the sidebar items
-- visibly change hover/selected states
+4) Type label next to title
+- Each item must show a small label next to display_name:
+  - text: BOT or API
+  - rendered as small “pill/superscript” chip (compact, rounded)
+  - style must be subtle and clean (not loud)
+  - chip color differs slightly for BOT vs API
+- The label must come from item.type in JSON (no hardcoding).
+
+5) Filter control (3-way switch)
+- Add a neat segmented control at top of sidebar with 3 options:
+  - ALL | BOT | API
+- Default selection: ALL
+- Clicking filters the list instantly (no reload).
+- Selected segment must look clearly active, but minimal.
+
+6) Visual design
+- Must match app styling (same fonts, spacing, rounded corners).
+- Compact rows, clean hierarchy.
+- Keep the existing badge/initial style if already implemented, but ensure it doesn’t conflict with the new type chip.
+
+Output:
+- Updated bot_library.json example (include both BOT and API items)
+- Code changes to load JSON type field
+- Sidebar UI changes (title rename + segmented control + type chip + filtering)
 No explanation.
