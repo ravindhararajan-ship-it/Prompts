@@ -1,0 +1,51 @@
+Restyle the BOT Library sidebar to match n8n’s node list look & feel.
+
+Do NOT change logic.
+Do NOT change layout structure.
+Only update styling.
+
+Target: n8n-style node list (compact, clean, strong selection, modern badges).
+
+Requirements:
+
+1) Sidebar container
+- Background: #F8FAFC
+- Subtle right divider: 1px #E5E7EB
+- Inner padding: 10–12px
+
+2) Bot row (list item)
+- Row height: 44–52px (compact)
+- Padding: 10px vertical, 12px horizontal
+- Border radius: 10px
+- Default background: transparent
+- Hover background: #EEF2FF
+- Smooth transition: 120ms
+
+3) Selected row
+- Background: #E0EAFF
+- Left accent bar: 3px solid #2563EB
+- Slight shadow/elevation (very subtle)
+- No layout shift when selected
+
+4) Badge (initial letter)
+- Size: 22px square
+- Radius: 7px
+- Background: #2563EB (solid)
+- Text: white, bold, centered
+- Gap badge→text: 10px
+
+5) Text
+- Title: medium weight, #111827
+- Description: 1 line, ellipsis, #6B7280, smaller font
+- Spacing title→desc: 2–4px
+
+6) Alignment
+- All titles start at the same x-position
+- Icons/badges vertically centered with title baseline
+- No inconsistent margins
+
+7) Scrollbar
+- Thin scrollbar, rounded thumb, low-contrast
+
+Return only styling code (QSS/ttk/theme changes) to achieve n8n-like appearance.
+No explanation.
