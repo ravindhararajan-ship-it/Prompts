@@ -1,58 +1,41 @@
-# PromptsCompletely restyle BOT Library to match n8n-level visual strength.
-
-This is not a minor tweak.
-Override existing styles.
+The sidebar styling is NOT taking effect. Fix this by forcing a ROOT-LEVEL style override and applying it to the exact sidebar widgets.
 
 Do NOT change logic.
 Do NOT change layout structure.
-Only replace styling.
+Only enforce styling + ensure it applies.
 
-REQUIREMENTS:
+MANDATORY:
+1) Identify the exact widget class used for BOT rows (Listbox / Treeview / Frame rows / QListWidget / QTreeView).
+2) Apply styles to THAT widget and its item delegates (not a parent container only).
+3) Apply the stylesheet/theme at the ROOT application level (App/Window) so children inherit it.
+4) Remove ALL opacity/alpha usage. Use solid colors only. No “light tint”, no transparency.
 
-1) Sidebar container
-- Background: #F9FAFB
-- Clear right border: 1px solid #E5E7EB
+STYLE TARGET (must be visible):
+- Sidebar bg: #F9FAFB
+- Selected row bg: #E0EAFF (solid)
+- Hover bg: #EEF2FF (solid)
+- Left selection bar: 4px solid #2563EB (must be clearly visible)
+- Badge: 24px, radius 8px, bg #2563EB (solid), text white bold
+
+ENFORCE:
+- Fixed row height: 48px
 - Padding: 12px
+- Badge→text gap: 10px
+- Title: #111827, font-weight 600
+- Desc: #4B5563, 1-line ellipsis
 
-2) Row design
-- Height: 48px fixed
-- Padding: 12px
-- Border-radius: 10px
-- No faded backgrounds
-- No low opacity washout
+VERIFICATION (required in code):
+- Add a temporary debug log/print confirming the style is applied (e.g., stylesheet length > 0 or style object assigned).
+- If the widget is QTreeView/QListView, implement a custom delegate to paint:
+  - hover background
+  - selected background
+  - left accent bar
+  - badge rectangle + letter
+  (Do NOT rely on default item rendering)
 
-3) Hover
-- Background: #EEF2FF
-- Immediate, visible feedback
-
-4) Selected row
-- Background: #E0EAFF
-- Strong 4px left accent bar: #2563EB
-- Slight elevation (subtle shadow)
-- Must look clearly selected
-
-5) Badge
-- Size: 24px
-- Radius: 8px
-- Solid #2563EB background
-- White bold letter
-- No pastel tint
-- Must feel strong and visible
-
-6) Text
-- Title: #111827, medium weight
-- Description: #4B5563, 90% opacity
-- Tight spacing (4px under title)
-- 1-line ellipsis
-
-7) Alignment
-- 10px gap badge → text
-- Perfect vertical centering
-- No inconsistent margins
-
-Goal:
-Sidebar must feel structured, confident, SaaS-grade.
-Not pale. Not washed. Not prototype.
-
-Return only full style override code.
+OUTPUT:
+Return ONLY the final code changes that:
+- apply root-level styling
+- correctly style the sidebar items
+- visibly change hover/selected states
 No explanation.
