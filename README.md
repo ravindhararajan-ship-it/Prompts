@@ -1,34 +1,32 @@
+========================
+PROMPT 1 — LAYOUT STRUCTURE
+========================
+
 TASK
-Refactor the current UI layout of the Workflow Creator to follow a modern n8n-style workflow builder design.
+Refactor the current UI layout of the Workflow Creator to follow a modern workflow builder structure similar to n8n.
 
-IMPORTANT RULES (DO NOT BREAK)
-
-- DO NOT modify any existing business logic.
-- DO NOT modify workflow execution logic.
-- DO NOT modify drag-and-drop functionality.
-- DO NOT modify bot execution functions.
-- DO NOT modify API calls or backend logic.
-- DO NOT change data models or workflow JSON generation.
-- Only modify UI layout, CSS styling, and component placement.
-- Reuse all existing event handlers and data bindings.
+STRICT RULES
+- DO NOT modify any business logic.
+- DO NOT modify workflow execution code.
+- DO NOT modify drag-and-drop behavior.
+- DO NOT modify API calls.
+- DO NOT modify backend logic or data models.
+- Only change UI layout containers and styling.
 
 GOAL
+Reorganize the screen into three panels.
 
-Reorganize the screen into three main panels similar to modern workflow automation tools (n8n / Azure Logic Apps):
+LEFT PANEL
+Available Bots
 
-1. LEFT PANEL – Available Bots
-2. CENTER PANEL – Workflow Canvas
-3. RIGHT PANEL – Bot Details / Inspector
+CENTER PANEL
+Workflow Canvas
 
-Also add a bottom execution toolbar.
+RIGHT PANEL
+Bot Details / Inspector
 
---------------------------------------------------
-
-NEW SCREEN STRUCTURE
-
-TOP HEADER
-
-Display:
+HEADER
+Add a top header containing:
 
 Workflow Builder
 Workflow Name
@@ -38,34 +36,55 @@ Save Button
 Example layout:
 
 --------------------------------------------------
-Workflow Builder                Active ○        Save
+Workflow Builder                 Active ○   Save
 Mining → IMPACS Transaction
 --------------------------------------------------
 
---------------------------------------------------
+Create layout containers using a flexible grid or flex layout:
 
-LEFT PANEL – AVAILABLE BOTS
+Left Sidebar width: ~260px
+Right Panel width: ~320px
+Center Canvas fills remaining width.
 
-Width: ~260px
+Do not move or rewrite logic code — only reorganize UI components.
 
-Replace any existing "Collection", "BOT/API", or toggle filters with a single section titled:
 
-Available Bots
 
-Optional subtitle:
-"Drag bots onto the canvas to build workflow"
+========================
+PROMPT 2 — AVAILABLE BOTS SIDEBAR
+========================
 
-Add search input at the top.
+TASK
+Simplify the left panel so it only shows "Available Bots".
 
-Search placeholder:
+STRICT RULES
+- Do not modify bot execution logic.
+- Do not change drag-drop functionality.
+- Do not change bot metadata structures.
+
+REQUIREMENTS
+
+Remove or hide:
+
+Collection labels
+BOT/API toggle buttons
+Any collection filters
+
+Replace with a single section:
+
+Title: Available Bots
+Subtitle (optional): Drag bots onto canvas to build workflow
+
+Add a search field at the top.
+
+Placeholder:
 Search bots…
 
-Search should filter the existing list client-side only.
-Do not change backend logic.
+Search should filter the already loaded bot list client-side only.
 
-Bot list items should appear as cards.
+Bot items should appear as draggable cards.
 
-Example bot card:
+Example:
 
 --------------------------------
 Reserve Mining Data
@@ -74,51 +93,49 @@ Fetch mining account information
 
 --------------------------------
 Create IMPACS Transaction
-Creates IMPACS transaction record
+Create transaction record
 --------------------------------
 
-Bot cards must remain draggable using the existing drag logic.
-
-Style rules:
+Card style:
 
 background: white
-border-radius: 8px
 border: 1px solid #D6D9DE
+border-radius: 8px
 padding: 12px
 margin-bottom: 10px
 cursor: grab
 
-Sidebar should scroll if bot list grows.
+Sidebar must scroll if bot list grows.
 
---------------------------------------------------
 
-CENTER PANEL – WORKFLOW CANVAS
 
-This panel must contain the existing workflow canvas.
+========================
+PROMPT 3 — WORKFLOW CANVAS DESIGN
+========================
 
-Do NOT rewrite canvas logic.
+TASK
+Improve the visual design of workflow nodes and canvas without altering functionality.
 
-Only move it to the center container.
+STRICT RULES
+- Do not change node logic.
+- Do not modify node connection code.
+- Do not modify event handlers.
 
-Canvas layout rules:
+CANVAS
 
-- Occupies remaining horizontal space
-- Light grid background
+Move the existing canvas into the center panel.
 
-Grid style:
+Add a light grid background.
 
 background-color: #F5F7FA
-grid-lines: very light gray
 
-Nodes remain exactly as currently implemented.
+Grid lines: very subtle light gray.
 
---------------------------------------------------
+NODE DESIGN
 
-WORKFLOW NODE VISUAL STYLE
+Nodes should appear as clean enterprise cards.
 
-Improve node appearance but keep functionality identical.
-
-Example node design:
+Example node layout:
 
 -----------------------------------
 Reserve Mining Data
@@ -129,30 +146,39 @@ MiningRefId
 Status
 -----------------------------------
 
-Style rules:
+STYLE
 
 background: white
 border: 1px solid #D6D9DE
 border-radius: 8px
 box-shadow: 0 1px 3px rgba(0,0,0,0.1)
+padding: 10px
 
 Selected node highlight:
 
 border-color: #2563EB
 
-Do NOT change node connection handles or logic.
+Do not change connection handles or node ports.
 
---------------------------------------------------
 
-RIGHT PANEL – BOT DETAILS / INSPECTOR
+
+========================
+PROMPT 4 — BOT DETAILS PANEL + EXECUTION TOOLBAR
+========================
+
+TASK
+Add a right-side Bot Details panel and a bottom execution toolbar.
+
+STRICT RULES
+- Do not modify backend logic.
+- Do not change workflow execution functions.
+- Reuse existing button handlers.
+
+RIGHT PANEL (Bot Inspector)
 
 Width: ~320px
 
-This panel shows information about the selected bot.
-
-Panel updates when user clicks a node in the canvas.
-
-Display:
+When a node is clicked show:
 
 BOT DETAILS
 
@@ -167,23 +193,18 @@ Outputs
 MiningRefId
 Status
 
-Field Mapping Section
+FIELD MAPPING
 
-Example mapping:
+Example:
 
 MiningRefId → MiningRefId
 Status → Status
 
-This panel must read existing bot metadata.
-Do not introduce new backend logic.
+Use existing metadata only.
 
---------------------------------------------------
+BOTTOM TOOLBAR
 
-BOTTOM EXECUTION TOOLBAR
-
-Add a centered toolbar at the bottom of the canvas.
-
-Buttons must reuse existing handlers.
+Add a horizontal toolbar at the bottom of the canvas.
 
 Buttons:
 
@@ -192,62 +213,22 @@ Run Workflow
 View Flow JSON
 Clear Canvas
 
-Example layout:
+Example:
 
---------------------------------------------------
+-------------------------------------
 
 [ Validate ]   [ Run Workflow ]   [ View Flow ]   [ Clear ]
 
---------------------------------------------------
+-------------------------------------
 
-Button style:
+STYLE
 
 border-radius: 6px
 padding: 10px 18px
-background: #2563EB
-color: white
+primary button color: #2563EB
+text color: white
 
-Secondary buttons: gray.
+Secondary buttons should be gray.
 
---------------------------------------------------
-
-FINTECH UI STYLE GUIDELINES
-
-Use a clean enterprise palette.
-
-Background: #F5F7FA
-Border: #D6D9DE
-Primary Blue: #2563EB
-Text: #1F2937
-Muted Text: #6B7280
-
-Spacing should feel dense but clean.
-
---------------------------------------------------
-
-FINAL EXPECTED LAYOUT
-
----------------------------------------------------------------
-Workflow Builder                                 Save
----------------------------------------------------------------
-
-Available Bots      Workflow Canvas           Bot Details
----------------------------------------------------------------
-
-Reserve Mining Data      [Reserve Mining Data]     Inputs
-Create IMPACS                 │                    AccountId
-Transaction                   ▼                    ProductCode
-                       [Create IMPACS Transaction]
-
----------------------------------------------------------------
-
-      [ Validate ]   [ Run Workflow ]   [ View Flow ]
-
----------------------------------------------------------------
-
-IMPORTANT
-
-Do not break existing functionality.
-
-Only restructure layout containers and styling.
-All current workflows must continue to work exactly as before.
+Do not introduce new backend calls.
+Reuse current handlers.
