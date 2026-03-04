@@ -1,234 +1,101 @@
 ========================
-PROMPT 1 — LAYOUT STRUCTURE
+PROMPT 1 — REMOVE RIGHT BOT DETAILS + CLEAN HEADER
 ========================
-
 TASK
-Refactor the current UI layout of the Workflow Creator to follow a modern workflow builder structure similar to n8n.
+Update the workflow screen to REMOVE the right-side "BOT DETAILS" inspector panel completely and reclaim the space for the canvas.
 
-STRICT RULES
+STRICT RULES (DO NOT BREAK)
 - DO NOT modify any business logic.
-- DO NOT modify workflow execution code.
-- DO NOT modify drag-and-drop behavior.
-- DO NOT modify API calls.
-- DO NOT modify backend logic or data models.
-- Only change UI layout containers and styling.
-
-GOAL
-Reorganize the screen into three panels.
-
-LEFT PANEL
-Available Bots
-
-CENTER PANEL
-Workflow Canvas
-
-RIGHT PANEL
-Bot Details / Inspector
-
-HEADER
-Add a top header containing:
-
-Workflow Builder
-Workflow Name
-Active Toggle
-Save Button
-
-Example layout:
-
---------------------------------------------------
-Workflow Builder                 Active ○   Save
-Mining → IMPACS Transaction
---------------------------------------------------
-
-Create layout containers using a flexible grid or flex layout:
-
-Left Sidebar width: ~260px
-Right Panel width: ~320px
-Center Canvas fills remaining width.
-
-Do not move or rewrite logic code — only reorganize UI components.
-
-
-
-========================
-PROMPT 2 — AVAILABLE BOTS SIDEBAR
-========================
-
-TASK
-Simplify the left panel so it only shows "Available Bots".
-
-STRICT RULES
-- Do not modify bot execution logic.
-- Do not change drag-drop functionality.
-- Do not change bot metadata structures.
+- DO NOT modify workflow execution logic.
+- DO NOT modify drag/drop or node connection logic.
+- DO NOT modify API calls, data models, JSON generation.
+- Only UI layout / styling changes.
 
 REQUIREMENTS
+1) Remove the entire right panel (BOT DETAILS / inspector section).
+2) The center canvas must expand to use the newly freed space.
+3) Remove the “Workflow Builder” header title section and remove “Active” + “Save” controls from the top area.
+   - If those buttons are wired to business logic, do NOT delete handlers; just hide the UI elements.
+4) Keep the left “Available Bots” panel unchanged and visible.
+5) Ensure the UI still renders and the canvas interactions work exactly as before.
 
-Remove or hide:
-
-Collection labels
-BOT/API toggle buttons
-Any collection filters
-
-Replace with a single section:
-
-Title: Available Bots
-Subtitle (optional): Drag bots onto canvas to build workflow
-
-Add a search field at the top.
-
-Placeholder:
-Search bots…
-
-Search should filter the already loaded bot list client-side only.
-
-Bot items should appear as draggable cards.
-
-Example:
-
---------------------------------
-Reserve Mining Data
-Fetch mining account information
---------------------------------
-
---------------------------------
-Create IMPACS Transaction
-Create transaction record
---------------------------------
-
-Card style:
-
-background: white
-border: 1px solid #D6D9DE
-border-radius: 8px
-padding: 12px
-margin-bottom: 10px
-cursor: grab
-
-Sidebar must scroll if bot list grows.
-
+DELIVERABLE
+- Provide unified diff only.
+- List changed files at the top.
 
 
 ========================
-PROMPT 3 — WORKFLOW CANVAS DESIGN
+PROMPT 2 — FINTECH COMMAND BAR (REPLACE BORING BOTTOM TOOLBAR)
 ========================
-
 TASK
-Improve the visual design of workflow nodes and canvas without altering functionality.
+Replace the bottom toolbar (Validate Flow / Run Workflow / View Flow JSON / Clear Canvas) with a top-right fintech-style command bar.
 
 STRICT RULES
-- Do not change node logic.
-- Do not modify node connection code.
-- Do not modify event handlers.
+- Reuse existing button handlers exactly as-is.
+- Do not change any backend calls or logic.
+- Do not rename actions or state fields.
+- UI-only restructuring + styling.
 
-CANVAS
+REQUIREMENTS
+1) Remove or hide the entire bottom toolbar container.
+2) Add a compact command bar anchored at the top-right of the canvas area (inside the main content container).
+3) Buttons (reuse existing actions/handlers):
+   - + Add (optional: opens existing “add bot” flow if present; if not present, omit this button)
+   - Validate
+   - Run (primary)
+   - View JSON
+   - Export (if exists; otherwise omit)
+   - Clear
 
-Move the existing canvas into the center panel.
+VISUAL STYLE (FinTech)
+- Button height 32–36px
+- Compact spacing, subtle shadows
+- Primary button: “Run ▷” (filled)
+- Secondary buttons: outline/ghost
+- Use a clean palette:
+  Background: #F5F7FA
+  Border: #D6D9DE
+  Primary: #1D4ED8 (or existing primary)
+  Text: #111827
+  Muted: #6B7280
+- Command bar container:
+  white background, border, radius 10px, slight shadow, looks like an enterprise toolbar.
 
-Add a light grid background.
-
-background-color: #F5F7FA
-
-Grid lines: very subtle light gray.
-
-NODE DESIGN
-
-Nodes should appear as clean enterprise cards.
-
-Example node layout:
-
------------------------------------
-Reserve Mining Data
-BOT
-
-Output
-MiningRefId
-Status
------------------------------------
-
-STYLE
-
-background: white
-border: 1px solid #D6D9DE
-border-radius: 8px
-box-shadow: 0 1px 3px rgba(0,0,0,0.1)
-padding: 10px
-
-Selected node highlight:
-
-border-color: #2563EB
-
-Do not change connection handles or node ports.
-
+DELIVERABLE
+- Unified diff only.
+- Do not introduce new libraries.
+- Use the existing styling mechanism used in the repo.
 
 
 ========================
-PROMPT 4 — BOT DETAILS PANEL + EXECUTION TOOLBAR
+PROMPT 3 — MAKE IT FEEL “ALIVE”: STATUS STRIP + CANVAS VISUALS
 ========================
-
 TASK
-Add a right-side Bot Details panel and a bottom execution toolbar.
+Make the UI feel more enterprise/fintech by adding a lightweight status strip and improving canvas density WITHOUT touching logic.
 
 STRICT RULES
-- Do not modify backend logic.
-- Do not change workflow execution functions.
-- Reuse existing button handlers.
+- No logic changes.
+- No API changes.
+- No new data models.
+- Styling + layout only.
 
-RIGHT PANEL (Bot Inspector)
+REQUIREMENTS
+1) Add a small status strip near the command bar (top-right area), showing:
+   - Status: Draft / Validated / Running / Completed (use existing status state if present; if not, show “Draft” static label)
+   - Last run: (if existing runtime state exists; otherwise show “—”)
+2) Improve canvas background:
+   - light grid or dotted grid (very subtle)
+   - reduce the “empty” feel by adding a soft vignette or slight center emphasis (CSS-only, optional)
+3) Node styling improvements (CSS/classnames only):
+   - better contrast
+   - small header line inside node
+   - selected node has stronger border glow
+   - keep ports/handles unchanged
+4) Left “Available Bots” panel:
+   - slightly stronger card borders
+   - hover effect
+   - keep drag behavior unchanged
 
-Width: ~320px
-
-When a node is clicked show:
-
-BOT DETAILS
-
-Bot Name
-Bot Description
-
-Inputs
-AccountId
-ProductCode
-
-Outputs
-MiningRefId
-Status
-
-FIELD MAPPING
-
-Example:
-
-MiningRefId → MiningRefId
-Status → Status
-
-Use existing metadata only.
-
-BOTTOM TOOLBAR
-
-Add a horizontal toolbar at the bottom of the canvas.
-
-Buttons:
-
-Validate Flow
-Run Workflow
-View Flow JSON
-Clear Canvas
-
-Example:
-
--------------------------------------
-
-[ Validate ]   [ Run Workflow ]   [ View Flow ]   [ Clear ]
-
--------------------------------------
-
-STYLE
-
-border-radius: 6px
-padding: 10px 18px
-primary button color: #2563EB
-text color: white
-
-Secondary buttons should be gray.
-
-Do not introduce new backend calls.
-Reuse current handlers.
+DELIVERABLE
+- Unified diff only.
+- Confirm in comments which elements were hidden vs removed.
