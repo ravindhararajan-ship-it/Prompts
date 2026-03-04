@@ -1,211 +1,253 @@
-Highlights & Key Findings
+TASK
+Refactor the current UI layout of the Workflow Creator to follow a modern n8n-style workflow builder design.
 
-• AI successfully analyzed regression repositories and identified core execution flows with minimal manual guidance.
+IMPORTANT RULES (DO NOT BREAK)
 
-• Copilot demonstrated the ability to reconstruct automation scripts by interpreting existing test logic and navigation steps.
+- DO NOT modify any existing business logic.
+- DO NOT modify workflow execution logic.
+- DO NOT modify drag-and-drop functionality.
+- DO NOT modify bot execution functions.
+- DO NOT modify API calls or backend logic.
+- DO NOT change data models or workflow JSON generation.
+- Only modify UI layout, CSS styling, and component placement.
+- Reuse all existing event handlers and data bindings.
 
-• Rapid prototyping capability observed — new automation scripts can be generated significantly faster compared to manual development.
+GOAL
 
-• Automation dependencies were partially detected, including configuration files, input data sources, and external utilities.
+Reorganize the screen into three main panels similar to modern workflow automation tools (n8n / Azure Logic Apps):
 
-• Execution sequence understanding was possible when repository structure and naming conventions were reasonably consistent.
+1. LEFT PANEL – Available Bots
+2. CENTER PANEL – Workflow Canvas
+3. RIGHT PANEL – Bot Details / Inspector
 
-• Standalone automation generation is achievable, but requires sufficient context such as sample inputs, configuration files, and execution flow hints.
+Also add a bottom execution toolbar.
 
-• Regression suites today are not fully AI-ready, primarily due to missing structured input/output capture mechanisms.
+--------------------------------------------------
 
-• Manual validations and user inputs still exist in several flows, which limits end-to-end automation reconstruction.
+NEW SCREEN STRUCTURE
 
-• Lack of descriptive comments and documentation reduces AI interpretation accuracy when analyzing complex automation logic.
+TOP HEADER
 
-• Model capability significantly impacts results — advanced code models demonstrated stronger contextual reasoning and more reliable code generation.
+Display:
 
+Workflow Builder
+Workflow Name
+Active Toggle
+Save Button
 
-FACT CHECK
+Example layout:
 
-1. VS Code Copilot supports custom agents defined as .agent.md files.
-2. These agents can store reusable context such as previous findings, bug fixes, and instructions.
-3. Workspace instructions can be stored in .github/copilot-instructions.md.
-4. Reusable prompts can be stored in .github/prompts/ to standardize workflows.
-5. This allows building a learning loop where Copilot remembers previous findings and improves generation.
+--------------------------------------------------
+Workflow Builder                Active ○        Save
+Mining → IMPACS Transaction
+--------------------------------------------------
 
-------------------------------------------------------------
+--------------------------------------------------
 
-COMPLETE WORKFLOW (AI AUTOMATION RECONSTRUCTION WITH LEARNING LOOP)
+LEFT PANEL – AVAILABLE BOTS
 
-+---------------------------------------------+
-| (A) Setup: Learning Context in VS Code IDE  |
-|---------------------------------------------|
-| - Custom Agent (.github/agents/*.agent.md)  |
-| - Repo Instructions (.github/copilot-...)   |
-| - Prompt files (.github/prompts/*.prompt.md)|
-| - References to prior findings / bug fixes  |
-+---------------------------+-----------------+
-                            |
-                            v
-+---------------------------------------------+
-| Step 1: DISCOVER (Discover Prompt)          |
-|---------------------------------------------|
-| Input: Repository                           |
-|                                             |
-| Actions:                                    |
-| - Scan repository structure                 |
-| - Detect automation entry points            |
-| - Identify execution chains                 |
-| - Detect dependencies and inputs            |
-|                                             |
-| Output:                                     |
-| JSON catalog containing all execution flows |
-| with entry points                           |
-+---------------------------+-----------------+
-                            |
-                            v
-+---------------------------------------------+
-| User Selection                              |
-|---------------------------------------------|
-| - User reviews execution flows              |
-| - User selects one or more flows            |
-+---------------------------+-----------------+
-                            |
-                            v
-+---------------------------------------------+
-| Step 2: RECONSTRUCT (CreateWF Prompt)       |
-|---------------------------------------------|
-| Input: Selected Flow JSON + same repo       |
-|                                             |
-| Actions:                                    |
-| - Rebuild selected execution flow           |
-| - Generate standalone automation runner     |
-| - Map dependencies                          |
-| - Parameterize input data                   |
-| - Create setup and run scripts              |
-|                                             |
-| Tooling: Selenium Agent                     |
-| - Reduce manual user interaction            |
-| - Reuse browser session/cookies             |
-| - Maintain context across iterations        |
-|                                             |
-| Output:                                     |
-| Standalone automation application           |
-| (runner + setup + run scripts)              |
-+---------------------------+-----------------+
-                            |
-                            v
-+---------------------------------------------+
-| Execute + Validate                          |
-|---------------------------------------------|
-| - Run generated automation                  |
-| - Capture logs and execution results        |
-| - Compare expected vs actual outputs        |
-| - Record PASS / FAIL status                 |
-+---------------------------+-----------------+
-                            |
-          +-----------------+------------------+
-          |                                    |
-          v                                    v
-+------------------------------+     +--------------------------------+
-| If FAIL / gaps               |     | If PASS / stable               |
-|------------------------------|     |--------------------------------|
-| - Missing dependencies       |     | - Promote to reusable template |
-| - Manual steps detected      |     | - Add to automation library    |
-| - Incorrect execution chain  |     | - Enable faster regression     |
-| - Missing documentation      |     | - Scale automation generation  |
-+---------------+--------------+     +--------------------------------+
-                |
-                v
-+---------------------------------------------+
-| Learning Loop                               |
-|---------------------------------------------|
-| - Update custom agent with findings         |
-| - Add bug fixes and solutions               |
-| - Record manual interactions needed         |
-| - Improve prompts and documentation         |
-|                                             |
-| Result:                                     |
-| AI becomes better at reconstructing flows   |
-| over time with minimal human interaction    |
-+---------------------------+-----------------+
-                            |
-                            +-----> Iterate
+Width: ~260px
 
-------------------------------------------------------------
+Replace any existing "Collection", "BOT/API", or toggle filters with a single section titled:
 
-DISCOVER PROMPT OUTPUT (JSON STRUCTURE)
+Available Bots
 
-{
-  "repo": "repository-name",
-  "generatedAt": "YYYY-MM-DD",
-  "flows": [
-    {
-      "flowId": "FLOW_1",
-      "flowName": "Login -> Search -> Submit",
-      "entryPoint": {
-        "file": "tests/login_test.py",
-        "function": "test_login"
-      },
-      "chain": [
-        {
-          "step": 1,
-          "action": "open_url",
-          "ref": "config.BASE_URL"
-        },
-        {
-          "step": 2,
-          "action": "login",
-          "ref": "pages/login.py::login()"
-        },
-        {
-          "step": 3,
-          "action": "search",
-          "ref": "pages/search.py::search()"
-        }
-      ],
-      "inputs": [
-        "credentials",
-        "search_term"
-      ],
-      "outputs": [
-        "status",
-        "screenshot_on_fail"
-      ],
-      "dependencies": [
-        "config.yml",
-        ".env",
-        "testdata.xlsx"
-      ]
-    }
-  ]
-}
+Optional subtitle:
+"Drag bots onto the canvas to build workflow"
 
-------------------------------------------------------------
+Add search input at the top.
 
-CREATEWF OUTPUT STRUCTURE
+Search placeholder:
+Search bots…
 
-Generated standalone automation package:
+Search should filter the existing list client-side only.
+Do not change backend logic.
 
-runner.py
-requirements.txt
-setup.bat / setup.sh
-run.bat / run.sh
-results.csv
-input_template.xlsx (if required)
+Bot list items should appear as cards.
 
-results.csv structure:
+Example bot card:
 
-test_case_id
-test_case_name
-status (PASS / FAIL)
-error_message
+--------------------------------
+Reserve Mining Data
+Fetch mining account information
+--------------------------------
 
-------------------------------------------------------------
+--------------------------------
+Create IMPACS Transaction
+Creates IMPACS transaction record
+--------------------------------
 
-KEY BENEFIT OF THE LEARNING LOOP
+Bot cards must remain draggable using the existing drag logic.
 
-Each iteration improves Copilot's ability to:
+Style rules:
 
-- understand repository structures
-- detect automation flows
-- reduce manual intervention
-- generate stable standalone automation scripts
+background: white
+border-radius: 8px
+border: 1px solid #D6D9DE
+padding: 12px
+margin-bottom: 10px
+cursor: grab
 
-Over time this creates a self-improving automation generation system.
+Sidebar should scroll if bot list grows.
+
+--------------------------------------------------
+
+CENTER PANEL – WORKFLOW CANVAS
+
+This panel must contain the existing workflow canvas.
+
+Do NOT rewrite canvas logic.
+
+Only move it to the center container.
+
+Canvas layout rules:
+
+- Occupies remaining horizontal space
+- Light grid background
+
+Grid style:
+
+background-color: #F5F7FA
+grid-lines: very light gray
+
+Nodes remain exactly as currently implemented.
+
+--------------------------------------------------
+
+WORKFLOW NODE VISUAL STYLE
+
+Improve node appearance but keep functionality identical.
+
+Example node design:
+
+-----------------------------------
+Reserve Mining Data
+BOT
+
+Output
+MiningRefId
+Status
+-----------------------------------
+
+Style rules:
+
+background: white
+border: 1px solid #D6D9DE
+border-radius: 8px
+box-shadow: 0 1px 3px rgba(0,0,0,0.1)
+
+Selected node highlight:
+
+border-color: #2563EB
+
+Do NOT change node connection handles or logic.
+
+--------------------------------------------------
+
+RIGHT PANEL – BOT DETAILS / INSPECTOR
+
+Width: ~320px
+
+This panel shows information about the selected bot.
+
+Panel updates when user clicks a node in the canvas.
+
+Display:
+
+BOT DETAILS
+
+Bot Name
+Bot Description
+
+Inputs
+AccountId
+ProductCode
+
+Outputs
+MiningRefId
+Status
+
+Field Mapping Section
+
+Example mapping:
+
+MiningRefId → MiningRefId
+Status → Status
+
+This panel must read existing bot metadata.
+Do not introduce new backend logic.
+
+--------------------------------------------------
+
+BOTTOM EXECUTION TOOLBAR
+
+Add a centered toolbar at the bottom of the canvas.
+
+Buttons must reuse existing handlers.
+
+Buttons:
+
+Validate Flow
+Run Workflow
+View Flow JSON
+Clear Canvas
+
+Example layout:
+
+--------------------------------------------------
+
+[ Validate ]   [ Run Workflow ]   [ View Flow ]   [ Clear ]
+
+--------------------------------------------------
+
+Button style:
+
+border-radius: 6px
+padding: 10px 18px
+background: #2563EB
+color: white
+
+Secondary buttons: gray.
+
+--------------------------------------------------
+
+FINTECH UI STYLE GUIDELINES
+
+Use a clean enterprise palette.
+
+Background: #F5F7FA
+Border: #D6D9DE
+Primary Blue: #2563EB
+Text: #1F2937
+Muted Text: #6B7280
+
+Spacing should feel dense but clean.
+
+--------------------------------------------------
+
+FINAL EXPECTED LAYOUT
+
+---------------------------------------------------------------
+Workflow Builder                                 Save
+---------------------------------------------------------------
+
+Available Bots      Workflow Canvas           Bot Details
+---------------------------------------------------------------
+
+Reserve Mining Data      [Reserve Mining Data]     Inputs
+Create IMPACS                 │                    AccountId
+Transaction                   ▼                    ProductCode
+                       [Create IMPACS Transaction]
+
+---------------------------------------------------------------
+
+      [ Validate ]   [ Run Workflow ]   [ View Flow ]
+
+---------------------------------------------------------------
+
+IMPORTANT
+
+Do not break existing functionality.
+
+Only restructure layout containers and styling.
+All current workflows must continue to work exactly as before.
