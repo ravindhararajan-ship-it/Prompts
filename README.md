@@ -1,180 +1,164 @@
-UI THEME REVERT — BACK TO FINTECH (LIGHT, CLEAN, ENTERPRISE)
+PROMPT — FINTECH UI POLISH (BOT LIBRARY + CANVAS) — NO LOGIC CHANGES
 
-GOAL
-Revert the app from the dark/colorful theme back to a fintech-style light theme:
-- Light background
-- Neutral grays
-- Blue accent
-- Subtle borders + shadows
-Keep current layout (Bot Library panel, canvas grid, run-in-canvas/clear-in-canvas) unchanged.
+CONTEXT
+We already reverted to a light fintech theme. Now refine:
+1) BOT Library left section must look like “Improved Enterprise Version” (polished, with icons, no leading dots).
+2) Canvas must NOT have rounded corners and must NOT have black border.
+3) Canvas grid must be clearly visible using a light ink-blue.
+4) Left panel must have a tinted background / header to visually differentiate from canvas.
 
 STRICT RULES
-- CSS/theme only. Do NOT change any business logic.
-- Do NOT change drag/drop logic, execution logic, polling logic, or data structures.
-- Keep existing components; only update styling.
+- UI/CSS only. Do NOT modify business logic, drag/drop logic, execution logic, data polling, or component structure beyond adding wrappers/classes.
+- Do NOT change any existing identifiers used by logic; only add classes if needed.
+- Provide unified diff, files changed, and a short checklist of what was updated.
 
-------------------------------------------------------------
-STEP 1 — DEFINE FINTECH THEME VARIABLES (ROOT)
-Replace current theme variables with:
+========================================================
+A) BOT LIBRARY — ENTERPRISE LOOK + ICONS + NO DOTS
+========================================================
 
---bg: #F6F8FB
---panel: #FFFFFF
---panel-2: #F9FAFB
---surface: #FFFFFF
---text: #111827
---muted: #6B7280
---border: #E5E7EB
---shadow: 0 8px 20px rgba(17,24,39,0.08)
---shadow-soft: 0 3px 10px rgba(17,24,39,0.06)
+A1) REMOVE LEADING DOTS
+In the bot list rendering (JS/TS/HTML template), remove any prefix like:
+"• " or "." or bullet decorators.
+If dots are coming from CSS list-style, disable it:
+- Ensure the container is NOT a <ul> with bullets, OR set:
+  list-style: none;
+  padding-left: 0;
 
-Primary/Accent (fintech blue):
---primary: #1D4ED8
---primaryHover: #1E40AF
---focusRing: rgba(29,78,216,0.20)
+A2) ADD ICONS FOR EACH BOT (NO EXTERNAL ASSETS REQUIRED)
+We have only 2 bots:
+- “Reserve Mining Data” => use a database/search style icon
+- “Create IMPACS Transaction” => use a document/plus or gear icon
 
-Success:
---success: #16A34A
-Warning:
---warning: #F59E0B
-Danger:
---danger: #DC2626
+Implement icons using inline SVG (preferred) OR emoji as last resort.
+Do NOT introduce new dependencies.
+Place the icon at the left of the bot name inside the card header.
 
-Remove any heavy gradients on the app background.
+Example inline SVG approach:
+- Create a small <span class="botIcon"> containing SVG
+- Size 16x16, monochrome in primary blue.
 
-------------------------------------------------------------
-STEP 2 — APP BACKGROUND (LIGHT)
-Set main app background to:
-background: var(--bg);
+A3) BOT LIBRARY PANEL DIFFERENTIATION
+Apply a subtle tinted background to the left panel:
+- Panel background: #F3F7FF (very light blue tint)
+- Panel border-right: 1px solid #D6E4FF
+- Panel header background: #E8F0FF
+- Header text: #0F2B5B (deep fintech navy)
 
-Remove:
-- radial gradients
-- dark overlays
-- vignette layers (if added earlier)
+Add a “section label” chip next to “BOT LIBRARY (2)”:
+- background: #DDEBFF
+- text: #1D4ED8
+- border-radius: 6px
+- font-size: 11px
+- padding: 2px 8px
 
-------------------------------------------------------------
-STEP 3 — TOP TITLE BAR + EDITOR/EXECUTIONS TOGGLE (FINTECH)
-Top bar:
+A4) BOT CARDS — POLISHED ENTERPRISE
+Card base:
 - background: #FFFFFF
-- border-bottom: 1px solid var(--border)
-- height: 52px
-- display flex, center the toggle
-- z-index above canvas
-
-Segmented toggle (Editor/Executions):
-- background: #F3F4F6
-- border: 1px solid #E5E7EB
-- height: 28px
-- font-size: 12px
-- border-radius: 8px (allowed only for toggle)
-Active tab:
-- background: #FFFFFF
-- text: var(--text)
-- subtle shadow: 0 1px 2px rgba(0,0,0,0.06)
-Inactive:
-- text: #6B7280
-- hover: background #EEF2FF
-
-Ensure toggle is fully visible (no clipping):
-- header overflow: visible
-- parent overflow: visible
-- toggle container: -webkit-app-region: no-drag if Electron
-
-------------------------------------------------------------
-STEP 4 — LEFT BOT LIBRARY PANEL (LIGHT FINTECH)
-Sidebar:
-- background: var(--panel)
-- border-right: 1px solid var(--border)
-- padding: 16px
-- no dark tints
-
-Header "BOT LIBRARY (2)":
-- font-size 12px
-- font-weight 700
-- letter-spacing 0.06em
-- color #374151
-
-Search input:
-- background #FFFFFF
-- border 1px solid #D1D5DB
-- height 32px
-- border-radius 8px
-- focus ring: 0 0 0 3px var(--focusRing)
-
-Bot cards:
-- background #FFFFFF
-- border 1px solid #E5E7EB
-- border-radius 10px
-- box-shadow: 0 1px 2px rgba(0,0,0,0.05)
+- border: 1px solid #D6E4FF
+- box-shadow: 0 2px 10px rgba(15, 43, 91, 0.08)
+- border-radius: 10px (allowed for cards)
+- padding: 10px 10px
 Hover:
-- border-color: rgba(29,78,216,0.35)
-- box-shadow: 0 8px 18px rgba(17,24,39,0.08)
-Selected:
-- outline or left bar using --primary (not neon)
-Left accent bar:
-- width 4px, background: --primary for both bots (fintech consistent)
+- border-color: rgba(29, 78, 216, 0.45)
+- box-shadow: 0 10px 22px rgba(15, 43, 91, 0.14)
+Selected/Active:
+- left accent bar: 4px solid #1D4ED8
+- background: #F7FAFF
 
-Remove emoji icons if present; use a small subtle circle or monochrome icon instead.
+Typography:
+- Bot name: 13px, weight 700, color #0F172A
+- Description: 11px, color #475569
+- “Drag to canvas →” text: 11px, color #1D4ED8 (link style)
 
-------------------------------------------------------------
-STEP 5 — CANVAS (LIGHT + VISIBLE GRID)
-Canvas container:
-- background: #FFFFFF
-- border: 1px solid var(--border)
-- box-shadow: var(--shadow-soft)
-- border-radius: 10px (allowed)
-- remove any dark vignette overlays
+Remove any “BOT” label that looks like a bullet row.
+If we must keep BOT label, render it as a pill:
+- background: #EEF5FF
+- color: #1D4ED8
+- border: 1px solid #D6E4FF
+- padding: 2px 6px
+- font-size: 10px
+- border-radius: 999px
 
-Grid (clear but subtle):
+A5) SEARCH INPUT — FINTECH
+- background #FFFFFF
+- border 1px solid #BFD3FF
+- focus ring: 0 0 0 3px rgba(29, 78, 216, 0.18)
+- height: 34px
+- border-radius: 10px
+Add a magnifier icon inside input (CSS background-image OR inline icon in wrapper).
+
+========================================================
+B) CANVAS — SQUARE CORNERS, NO BLACK BORDER, CLEAR GRID
+========================================================
+
+B1) REMOVE ROUNDED CORNERS + BLACK BORDER
+Canvas container must be square:
+- border-radius: 0 !important;
+Remove black border entirely:
+- border: 1px solid #D6E4FF;  (light border) OR border: none;
+NO thick border, NO black stroke.
+
+B2) CANVAS GRID — LIGHT INK BLUE, CLEARLY VISIBLE
+Use a 2-layer grid (minor + major). Ink-blue, subtle but clearly visible:
+
 background-color: #FFFFFF;
 background-image:
-  linear-gradient(to right, rgba(17,24,39,0.08) 1px, transparent 1px),
-  linear-gradient(to bottom, rgba(17,24,39,0.08) 1px, transparent 1px),
-  linear-gradient(to right, rgba(17,24,39,0.04) 1px, transparent 1px),
-  linear-gradient(to bottom, rgba(17,24,39,0.04) 1px, transparent 1px);
+  linear-gradient(to right, rgba(29,78,216,0.10) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(29,78,216,0.10) 1px, transparent 1px),
+  linear-gradient(to right, rgba(29,78,216,0.05) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(29,78,216,0.05) 1px, transparent 1px);
 background-size:
   120px 120px,
   120px 120px,
   24px 24px,
   24px 24px;
 
-------------------------------------------------------------
-STEP 6 — CANVAS NODES (FINTECH)
-Node cards:
-- background: #FFFFFF
-- border: 1px solid #E5E7EB
-- border-radius: 12px
-- box-shadow: 0 10px 24px rgba(17,24,39,0.10)
-Title: #111827, weight 600
-Labels: #6B7280
-Ports: --primary with subtle ring (no glow)
-Hover:
-- border-color: rgba(29,78,216,0.40)
+If grid is implemented in a <canvas> or library setting, update its grid color config accordingly (but do not change logic).
 
-------------------------------------------------------------
-STEP 7 — RUN/CLEAR BUTTONS INSIDE CANVAS (CLEAN)
-Run button (in Executions canvas):
-- background: var(--primary)
-- hover: var(--primaryHover)
-- border-radius: 0 or 8px (choose ONE style globally; recommended 8px for fintech consistency)
-- shadow: 0 8px 18px rgba(17,24,39,0.12)
+B3) CANVAS SURFACE SHADOW (SUBTLE)
+- box-shadow: 0 6px 18px rgba(15, 43, 91, 0.10);
+- Keep padding/margins as-is.
 
-Clear button (bottom-right inside canvas):
-- background: #DC2626
-- hover: #B91C1C
-- border-radius consistent with Run
-- keep visible only when nodes exist (if already implemented)
+========================================================
+C) TITLE BAR / TOGGLE (ONLY IF NEEDED)
+========================================================
+If Editor/Executions toggle is currently faint or blends in:
+- Add a subtle container background: #F3F7FF
+- Border: 1px solid #D6E4FF
+- Height: 28px, font-size 12px
+- Active tab background: #FFFFFF, text: #0F172A
 
-------------------------------------------------------------
-STEP 8 — REMOVE DARK THEME ARTIFACTS
-Search and remove/override any styles that set:
-- background: #0b1220 / #0f172a / dark rgba overlays
-- text: #e5e7eb
-- heavy neon borders
-- vignette ::after overlays
+Do NOT move toggle location in this prompt.
 
-------------------------------------------------------------
-DELIVERABLE
+========================================================
+D) IMPLEMENTATION DETAILS
+========================================================
+1) Find CSS files controlling:
+- Bot library panel (left)
+- Bot cards
+- Canvas wrapper / canvas element
+
+2) Add/adjust classes if necessary:
+- .botLibraryPanel
+- .botLibraryHeader
+- .botCard
+- .botIcon
+- .canvasSurface
+
+3) Ensure there are no global overrides like:
+- border: 4px solid #000
+- border-radius on all panels
+
+========================================================
+E) OUTPUT REQUIRED
+========================================================
 Return:
-1) unified diff only
-2) files modified
-3) confirm: light fintech theme restored, layout unchanged, logic untouched
+- Unified diff (patch)
+- List of files modified
+- Checklist confirming:
+  [ ] No dots/bullets
+  [ ] Icons visible for each bot
+  [ ] Left panel has tinted background and header differentiation
+  [ ] Canvas square corners
+  [ ] No black border
+  [ ] Grid clearly visible in light ink-blue
