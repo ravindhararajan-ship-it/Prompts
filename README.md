@@ -1,324 +1,342 @@
-UI REFACTOR — MOVE EDITOR / EXECUTIONS TO TITLE BAR CENTER
+UI UPDATE — EXECUTIONS TAB: MOVE RUN INTO CANVAS + STRONGER GRID + NO ROUNDED CORNERS
 
 GOAL
-Move the Editor / Executions toggle into the title bar area and center it horizontally, similar to modern workflow tools.
+- In the Executions tab, move the Run button from the header into the canvas, bottom-right overlay.
+- Make the canvas grid clearly visible (n8n-like).
+- Remove rounded corners from canvas container and overlays.
 
 STRICT RULES
-- Do NOT change tab switching logic.
-- Do NOT modify execution logic.
-- Layout + CSS only.
+- DO NOT change workflow execution logic.
+- DO NOT change run handler behavior; only relocate the existing Run button.
+- UI/CSS only.
 
-STEP 1 — RESTRUCTURE TITLE BAR
+------------------------------------------------------------
+A) MOVE RUN BUTTON INTO CANVAS (EXECUTIONS TAB ONLY)
 
-Locate the title bar container where "Workflow Creator" and window controls are rendered.
+1) Locate the Executions tab header area where "Run" button is currently rendered.
+   - Remove/hide Run button from the header in Executions tab view.
 
-Convert it into a 3-zone layout:
+2) In the Executions tab canvas container (the wrapper that contains the workflow diagram/canvas),
+   add a bottom-right overlay container inside the canvas:
 
-TitleBar
-  LeftSection      → Workflow Creator title
-  CenterSection    → Editor / Executions toggle
-  RightSection     → window controls + run status
+CanvasWrapper (position: relative)
+  CanvasSurface
+  RunOverlay (position: absolute; bottom-right)
 
-CSS:
+3) Render the existing Run button inside RunOverlay ONLY when the active tab is Executions.
+   - Reuse the same onClick handler/function currently used by Run.
+   - Do not change button label or handler.
 
-TitleBar
-display: flex;
-align-items: center;
-justify-content: space-between;
-padding: 8px 16px;
-height: 40px;
+RunOverlay CSS requirements:
+- position: absolute;
+- right: 16px;
+- bottom: 16px;
+- z-index: 60;
 
-LeftSection
-flex: 1;
-display: flex;
-align-items: center;
+Run button styling requirements:
+- background: #2563EB (fintech blue)
+- color: #FFFFFF
+- border: 1px solid #1D4ED8
+- border-radius: 0 (no rounded corners)
+- padding: 8px 14px
+- font-size: 12px
+- font-weight: 600
+- box-shadow: 0 1px 2px rgba(0,0,0,0.12)
+Hover:
+- background: #1D4ED8
 
-CenterSection
-flex: 0;
-display: flex;
-justify-content: center;
-align-items: center;
+Optional (recommended):
+- Disable button while running (if you already have running state) but do NOT add new logic; only bind to existing running flag if present.
 
-RightSection
-flex: 1;
-display: flex;
-justify-content: flex-end;
-align-items: center;
-gap: 10px;
+------------------------------------------------------------
+B) MAKE GRID CLEARLY VISIBLE (CANVAS BACKGROUND)
 
-STEP 2 — MOVE TOGGLE
+1) Locate the canvas background styling (the element showing the large white area).
+2) Replace plain white background with a visible grid using CSS background layers.
 
-Move the existing Editor / Executions segmented control into CenterSection.
+Grid requirements:
+- Light background (#FFFFFF or #FAFBFD)
+- Two-level grid (minor + major lines) like n8n
+- Must remain visible at normal zoom and not overpower nodes
 
-Do not change any event handlers.
+Apply to CanvasSurface CSS:
 
-STEP 3 — COMPACT N8N STYLE
+background-color: #FFFFFF;
+background-image:
+  linear-gradient(to right, rgba(15,23,42,0.08) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(15,23,42,0.08) 1px, transparent 1px),
+  linear-gradient(to right, rgba(15,23,42,0.04) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(15,23,42,0.04) 1px, transparent 1px);
+background-size:
+  120px 120px,
+  120px 120px,
+  24px 24px,
+  24px 24px;
+background-position: 0 0, 0 0, 0 0, 0 0;
 
-SegmentContainer
-display: inline-flex;
-background: #EEF2F6;
+(If the canvas library already has a grid option, prefer turning that on instead of CSS, but only if it’s trivial and doesn’t affect behavior.)
+
+------------------------------------------------------------
+C) REMOVE ROUNDED CORNERS (CANVAS + OVERLAYS)
+
+1) Identify canvas container/frame styles that use border-radius.
+2) Set border-radius: 0 for:
+- Canvas frame/container
+- Canvas inner surface wrapper
+- RunOverlay container (if it has any radius)
+- Any canvas toolbars shown inside canvas
+
+Also ensure the canvas has a clear border:
 border: 1px solid #D0D5DD;
-border-radius: 0;
-overflow: hidden;
-height: 28px;
 
-SegmentButton
-padding: 4px 12px;
-font-size: 12px;
-border: none;
-background: transparent;
-border-right: 1px solid #D0D5DD;
-cursor: pointer;
+------------------------------------------------------------
+DELIVERABLE
 
-SegmentButton:last-child
-border-right: none;
+Return:
+1) Unified diff only
+2) Files modified
+3) Confirm:
+   - Run button removed from header in Executions tab
+   - Run button appears bottom-right inside canvas
+   - Grid is visible and two-level
+   - No rounded corners on canvas/frame/overlay
+  
 
-ActiveSegment
-background: #FFFFFF;
-font-weight: 600;
+UI POLISH PASS — MAKE THE APP LOOK LIKE A FINISHED COLORFUL PRODUCT (NO LOGIC CHANGES)
 
-STEP 4 — AVOID WINDOW CONTROL COLLISION
+GOAL
+Make the UI feel like a polished standard workflow tool: colorful accents, layered surfaces, clear hierarchy, modern shadows, better canvas background, and strong hover/selected states.
 
-Ensure the toggle never overlaps the system window buttons:
+STRICT RULES
+- DO NOT change business logic, execution logic, drag/drop logic, or data structures.
+- Styling + layout polish only (CSS + small markup wrappers OK).
 
-CenterSection
-position: absolute;
-left: 50%;
-transform: translateX(-50%);
+THEME (DEFINE CSS VARIABLES ONCE)
+Create a theme palette (non-fintech, colorful) using CSS variables at app root:
 
-STEP 5 — VERIFY
+--bg: #0b1220
+--panel: #0f172a
+--panel-2: #111c33
+--surface: #0c152b
+--text: #e5e7eb
+--muted: #94a3b8
+--border: rgba(255,255,255,0.10)
+--shadow: 0 10px 30px rgba(0,0,0,0.35)
+--shadow-soft: 0 6px 18px rgba(0,0,0,0.25)
 
-Confirm:
-- Editor / Executions sits centered in title bar
-- Title remains left aligned
-- Window controls stay right aligned
-- Header height remains compact
+Accent gradient:
+--accentA: #7c3aed
+--accentB: #22c55e
+--accentC: #06b6d4
+--accentD: #f97316
+
+Primary button:
+--primary: #7c3aed
+--primaryHover: #6d28d9
+
+Danger:
+--danger: #ef4444
+
+STEP 1 — APP BACKGROUND (REMOVE PLAIN WHITE)
+Set the main app background to a subtle gradient so it feels premium:
+background: radial-gradient(1200px 700px at 20% 10%, rgba(124,58,237,0.25), transparent 55%),
+            radial-gradient(900px 600px at 80% 20%, rgba(6,182,212,0.18), transparent 55%),
+            radial-gradient(900px 600px at 30% 90%, rgba(34,197,94,0.14), transparent 60%),
+            var(--bg);
+
+STEP 2 — LEFT SIDEBAR "BOT LIBRARY" (MAKE IT LOOK LIKE A TOOL)
+- Sidebar background: var(--panel)
+- Border-right: 1px solid var(--border)
+- Add a top mini header strip with subtle gradient and icon:
+  header background: linear-gradient(90deg, rgba(124,58,237,0.20), rgba(6,182,212,0.10));
+- Make BOT LIBRARY title white, count muted.
+- Search input:
+  background: rgba(255,255,255,0.06)
+  border: 1px solid rgba(255,255,255,0.10)
+  color: var(--text)
+  placeholder: rgba(229,231,235,0.45)
+  focus ring: 0 0 0 3px rgba(124,58,237,0.35)
+
+Bot cards:
+- background: rgba(255,255,255,0.06)
+- border: 1px solid rgba(255,255,255,0.10)
+- shadow: 0 4px 12px rgba(0,0,0,0.20)
+- On hover: translateY(-1px), border color rgba(124,58,237,0.55), background slightly brighter
+- Add a colored left accent bar per card (6px wide):
+  Reserve Mining Data -> gradient (purple to cyan)
+  Create IMPACS -> gradient (green to orange)
+
+Selected bot card:
+- background: rgba(124,58,237,0.18)
+- border: 1px solid rgba(124,58,237,0.55)
+
+STEP 3 — TITLE BAR + TAB TOGGLE (SMALL, CLEAN, NOT WHITE)
+- Title bar background: rgba(255,255,255,0.03)
+- Border-bottom: 1px solid var(--border)
+- Title text: var(--text), weight 600
+- Editor/Executions segmented toggle:
+  container background: rgba(255,255,255,0.06)
+  border: 1px solid rgba(255,255,255,0.10)
+  active tab: background rgba(255,255,255,0.10), text var(--text)
+  inactive: text rgba(229,231,235,0.65)
+  height: 28px, font-size: 12px
+  border-radius: 10px is OK here only (it looks modern); everything else can stay square.
+
+STEP 4 — CANVAS VISUALS (MAKE IT “N8N-LIKE” BUT POLISHED)
+Canvas container:
+- background: var(--surface)
+- border: 1px solid var(--border)
+- shadow: var(--shadow)
+- remove rounded corners if currently required; otherwise allow subtle radius 10px ONLY on outer canvas (choose one; consistent).
+
+Grid:
+Use a visible but elegant grid on dark surface:
+background-image:
+  linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px),
+  linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+
+Also add a subtle vignette overlay inside canvas:
+::after overlay with radial-gradient(transparent 40%, rgba(0,0,0,0.35) 100%) and pointer-events none.
+
+STEP 5 — CANVAS NODES (MAKE THEM POP)
+Node cards on canvas:
+- background: rgba(255,255,255,0.08)
+- border: 1px solid rgba(255,255,255,0.12)
+- box-shadow: 0 10px 24px rgba(0,0,0,0.25)
+- Title color: var(--text)
+- Secondary labels: var(--muted)
+- Add top accent strip on node matching bot type gradient (same as library).
+- Hover: border rgba(6,182,212,0.55), slight lift.
+
+Connection dots/ports:
+- make them brighter (cyan) with glow:
+  box-shadow: 0 0 0 3px rgba(6,182,212,0.20)
+
+Links/edges:
+- if configurable: use gradient stroke or brighter line; otherwise keep existing but increase contrast.
+
+STEP 6 — CLEAR BUTTON (IN CANVAS, BOTTOM RIGHT, DANGER)
+You already have Clear inside canvas. Make it look “tool-grade”:
+- background: #ef4444
+- border: 1px solid #b91c1c
+- color: white
+- border-radius: 0 (square)
+- position: absolute; right: 16px; bottom: 16px;
+- shadow: 0 8px 18px rgba(0,0,0,0.30)
+- show only when canvas has >=1 node (bind to existing node-count state if available; otherwise keep always visible)
+
+STEP 7 — GENERAL TYPOGRAPHY + SPACING
+- Use one modern font stack (system font ok) and normalize:
+  body font-size 13px, headings 12–14px, muted 11–12px
+- Increase whitespace:
+  sidebar padding 16px
+  consistent 10–12px gaps
 
 DELIVERABLE
 - Unified diff only
 - List files modified
+- Confirm no changes to logic (only CSS/markup)
 
 
-UI REDESIGN — CONVERT "AVAILABLE BOTS" PANEL INTO ENTERPRISE BOT LIBRARY
+UI FIX — EDITOR / EXECUTIONS TOGGLE NOT FULLY VISIBLE (CLIPPING / OVERFLOW / Z-INDEX)
 
 GOAL
-Redesign the left sidebar "Available Bots" section to an enterprise-style Bot Library panel with card-based bots, search bar, and improved visual hierarchy.
+Make the "Editor | Executions" segmented toggle fully visible at all window sizes.
+Fix any clipping caused by overflow/height/padding/z-index or titlebar drag region.
 
 STRICT RULES
-- DO NOT modify any workflow logic.
-- DO NOT modify drag/drop implementation.
-- DO NOT modify bot execution logic.
-- Only change UI layout and styling of the sidebar.
-
----------------------------------------------------
-
-STEP 1 — RENAME PANEL HEADER
-
-Change the sidebar header text from:
-
-"Available Bots"
-
-to
-
-"BOT LIBRARY"
-
-Header style:
-
-font-size: 13px
-font-weight: 600
-letter-spacing: 0.04em
-color: #374151
-padding-bottom: 8px
-border-bottom: 1px solid #E5E7EB
-
----------------------------------------------------
-
-STEP 2 — ADD BOT COUNT
-
-Display number of bots in header.
-
-Example:
-
-BOT LIBRARY (2)
-
----------------------------------------------------
-
-STEP 3 — ADD SEARCH BAR
-
-Add a search input below the header.
-
-Search field design:
-
-height: 32px
-padding: 6px 10px
-font-size: 13px
-border: 1px solid #D1D5DB
-background: #FFFFFF
-border-radius: 0
-outline: none
-width: 100%
-
-Placeholder text:
-
-"Search bots..."
-
-Focus state:
-
-border-color: #3B82F6
-
----------------------------------------------------
-
-STEP 4 — CONVERT BOT ITEMS INTO CARDS
-
-Replace current bot list with card layout.
-
-Each bot should appear as a rectangular card.
-
-Card structure:
-
-BotCard
-  BotTitle
-  BotDescription
-  BotFooter
-
-Example content:
-
-Reserve Mining Data
-Fetch reserve mining account details
-
-BOT
-Drag to canvas →
-
----------------------------------------------------
-
-STEP 5 — CARD STYLING
-
-Card style:
-
-background: #FFFFFF
-border: 1px solid #E5E7EB
-padding: 12px
-margin-bottom: 10px
-border-radius: 0
-
-Add subtle elevation:
-
-box-shadow: 0 1px 2px rgba(0,0,0,0.05)
-
----------------------------------------------------
-
-STEP 6 — BOT TITLE STYLE
-
-BotTitle
-
-font-size: 14px
-font-weight: 600
-color: #111827
-margin-bottom: 4px
-
----------------------------------------------------
-
-STEP 7 — BOT DESCRIPTION STYLE
-
-BotDescription
-
-font-size: 12px
-color: #6B7280
-margin-bottom: 6px
-
----------------------------------------------------
-
-STEP 8 — BOT FOOTER
-
-Footer should contain:
-
-BOT label
-Drag hint
-
-Example layout:
-
-BOT        Drag to canvas →
-
-Footer style:
-
-display: flex
-justify-content: space-between
-font-size: 11px
-color: #9CA3AF
-
----------------------------------------------------
-
-STEP 9 — ADD BOT ICONS
-
-Add simple icons before bot titles.
-
-Examples:
-
-🧠 Reserve Mining Data
-⚙ Create IMPACS Transaction
-
-Icons should be inline with the title.
-
----------------------------------------------------
-
-STEP 10 — ADD HOVER EFFECT
-
-When hovering over bot card:
-
-background: #F5F8FF
-border-color: #3B82F6
-cursor: grab
-
----------------------------------------------------
-
-STEP 11 — SIDEBAR BACKGROUND
-
-Set sidebar background:
-
-background: #F8FAFC
-border-right: 1px solid #E5E7EB
-padding: 16px
-
----------------------------------------------------
-
-STEP 12 — SIDEBAR WIDTH
-
-Set fixed width:
-
-width: 260px
-
-Ensure the canvas takes the remaining screen width.
-
----------------------------------------------------
-
-STEP 13 — SCROLL SUPPORT
-
-Enable vertical scroll if bots exceed screen height.
-
-overflow-y: auto
-height: 100%
-
----------------------------------------------------
-
-STEP 14 — DO NOT TOUCH
-
-The following must remain unchanged:
-
-- drag/drop functionality
-- bot data structure
-- bot execution logic
-- canvas node rendering
-
-Only the sidebar UI must change.
-
----------------------------------------------------
-
+- UI/CSS/layout only.
+- Do NOT change any business logic or tab-switch logic.
+- Do NOT change event handlers; only fix positioning and container sizing.
+
+------------------------------------------------------------
+STEP 1 — IDENTIFY THE TOGGLE CONTAINER
+Locate the component/HTML that renders:
+[Editor] [Executions]
+(usually a segmented control / tab switcher near the top center)
+
+Wrap it in a dedicated container:
+<div class="modeToggleBar">
+   ...segmented toggle...
+</div>
+
+------------------------------------------------------------
+STEP 2 — PLACE TOGGLE IN A NON-CLIPPED TOP BAR
+Ensure the toggle lives inside a top header area that:
+- has a fixed height
+- has padding
+- does NOT have overflow hidden
+- sits above canvas
+
+Required header styles (apply to header/topbar wrapper):
+height: 52px;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 10px 12px;
+position: relative;
+z-index: 50;
+overflow: visible;
+
+If there is an existing topbar, apply these styles to it.
+If not, create one and move only the toggle into it (no logic change).
+
+------------------------------------------------------------
+STEP 3 — REMOVE CLIPPING FROM PARENT CONTAINERS
+Search for any parent containers around the topbar/toggle that have:
+overflow: hidden;
+or fixed height smaller than 52px
+
+Fix:
+- Set overflow: visible on the immediate parent(s) of the toggle
+- Ensure the container that hosts both topbar and canvas uses:
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+IMPORTANT: Only adjust containers affecting the top bar/toggle.
+
+------------------------------------------------------------
+STEP 4 — ELECTRON TITLEBAR / DRAG REGION (IF APPLICABLE)
+If this is Electron/custom title bar:
+Sometimes a draggable region hides controls.
+
+For the top bar region:
+- Keep draggable only where needed
+- Ensure the toggle container is NOT draggable so it can receive clicks and render properly.
+
+Add:
+.modeToggleBar {
+  -webkit-app-region: no-drag;
+}
+
+If you use a global draggable header, set:
+.header { -webkit-app-region: drag; }
+.modeToggleBar { -webkit-app-region: no-drag; }
+
+------------------------------------------------------------
+STEP 5 — Z-INDEX AND POSITION
+Make sure the toggle is above the canvas:
+.modeToggleBar { position: relative; z-index: 60; }
+
+If canvas has overlays, ensure they are below 60.
+
+------------------------------------------------------------
+STEP 6 — RESPONSIVE FALLBACK
+If the window becomes narrow, prevent the toggle from compressing into invisibility:
+.modeToggleBar { min-width: 220px; }
+.segmentedToggle { height: 28px; }
+.segmentedToggle button { padding: 0 12px; font-size: 12px; }
+
+------------------------------------------------------------
 DELIVERABLE
-
 Return:
-
 1) unified diff
 2) files modified
-3) confirmation that bot drag behavior remains unchanged
+3) short explanation: which overflow/height/drag-region caused clipping and how it was fixed
+4) confirm: toggle fully visible and clickable at min window size (e.g., 1024x600)
 
 
