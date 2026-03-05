@@ -1,164 +1,173 @@
-PROMPT — FINTECH UI POLISH (BOT LIBRARY + CANVAS) — NO LOGIC CHANGES
+PROMPT — FINTECH UI POLISH v2 (GRID TONE + ALIGNMENT + TITLEBAR + SPACING) — UI ONLY
 
-CONTEXT
-We already reverted to a light fintech theme. Now refine:
-1) BOT Library left section must look like “Improved Enterprise Version” (polished, with icons, no leading dots).
-2) Canvas must NOT have rounded corners and must NOT have black border.
-3) Canvas grid must be clearly visible using a light ink-blue.
-4) Left panel must have a tinted background / header to visually differentiate from canvas.
+CONTEXT (CURRENT STATE)
+- Grid is too thick/dark.
+- “BOT LIBRARY” title and count are misaligned.
+- “Drag bots onto canvas…” needs a divider line (left panel) between title area and list area.
+- Too much vertical/inner spacing between title bar, left panel, and canvas.
+- Window/title bar area looks plain (needs background + font color update).
 
 STRICT RULES
-- UI/CSS only. Do NOT modify business logic, drag/drop logic, execution logic, data polling, or component structure beyond adding wrappers/classes.
-- Do NOT change any existing identifiers used by logic; only add classes if needed.
-- Provide unified diff, files changed, and a short checklist of what was updated.
+- CSS/UI only. Do NOT change business logic, drag/drop logic, canvas logic, execution logic, or polling logic.
+- Do NOT rename existing IDs/classes referenced by JS. You may ADD wrapper classes if necessary.
+- Return: unified diff + files changed + checklist.
 
 ========================================================
-A) BOT LIBRARY — ENTERPRISE LOOK + ICONS + NO DOTS
+1) GRID — TONE DOWN BUT CLEARLY VISIBLE
 ========================================================
+Wherever canvas grid background is defined (CSS background-image OR library grid config):
 
-A1) REMOVE LEADING DOTS
-In the bot list rendering (JS/TS/HTML template), remove any prefix like:
-"• " or "." or bullet decorators.
-If dots are coming from CSS list-style, disable it:
-- Ensure the container is NOT a <ul> with bullets, OR set:
-  list-style: none;
-  padding-left: 0;
+TARGET LOOK:
+- Thin, light gray lines (not blue), still visible.
+- Two-layer grid: minor + major. Minor subtle, major slightly stronger.
+- Ensure line thickness is 1px only.
 
-A2) ADD ICONS FOR EACH BOT (NO EXTERNAL ASSETS REQUIRED)
-We have only 2 bots:
-- “Reserve Mining Data” => use a database/search style icon
-- “Create IMPACS Transaction” => use a document/plus or gear icon
-
-Implement icons using inline SVG (preferred) OR emoji as last resort.
-Do NOT introduce new dependencies.
-Place the icon at the left of the bot name inside the card header.
-
-Example inline SVG approach:
-- Create a small <span class="botIcon"> containing SVG
-- Size 16x16, monochrome in primary blue.
-
-A3) BOT LIBRARY PANEL DIFFERENTIATION
-Apply a subtle tinted background to the left panel:
-- Panel background: #F3F7FF (very light blue tint)
-- Panel border-right: 1px solid #D6E4FF
-- Panel header background: #E8F0FF
-- Header text: #0F2B5B (deep fintech navy)
-
-Add a “section label” chip next to “BOT LIBRARY (2)”:
-- background: #DDEBFF
-- text: #1D4ED8
-- border-radius: 6px
-- font-size: 11px
-- padding: 2px 8px
-
-A4) BOT CARDS — POLISHED ENTERPRISE
-Card base:
-- background: #FFFFFF
-- border: 1px solid #D6E4FF
-- box-shadow: 0 2px 10px rgba(15, 43, 91, 0.08)
-- border-radius: 10px (allowed for cards)
-- padding: 10px 10px
-Hover:
-- border-color: rgba(29, 78, 216, 0.45)
-- box-shadow: 0 10px 22px rgba(15, 43, 91, 0.14)
-Selected/Active:
-- left accent bar: 4px solid #1D4ED8
-- background: #F7FAFF
-
-Typography:
-- Bot name: 13px, weight 700, color #0F172A
-- Description: 11px, color #475569
-- “Drag to canvas →” text: 11px, color #1D4ED8 (link style)
-
-Remove any “BOT” label that looks like a bullet row.
-If we must keep BOT label, render it as a pill:
-- background: #EEF5FF
-- color: #1D4ED8
-- border: 1px solid #D6E4FF
-- padding: 2px 6px
-- font-size: 10px
-- border-radius: 999px
-
-A5) SEARCH INPUT — FINTECH
-- background #FFFFFF
-- border 1px solid #BFD3FF
-- focus ring: 0 0 0 3px rgba(29, 78, 216, 0.18)
-- height: 34px
-- border-radius: 10px
-Add a magnifier icon inside input (CSS background-image OR inline icon in wrapper).
-
-========================================================
-B) CANVAS — SQUARE CORNERS, NO BLACK BORDER, CLEAR GRID
-========================================================
-
-B1) REMOVE ROUNDED CORNERS + BLACK BORDER
-Canvas container must be square:
-- border-radius: 0 !important;
-Remove black border entirely:
-- border: 1px solid #D6E4FF;  (light border) OR border: none;
-NO thick border, NO black stroke.
-
-B2) CANVAS GRID — LIGHT INK BLUE, CLEARLY VISIBLE
-Use a 2-layer grid (minor + major). Ink-blue, subtle but clearly visible:
+If grid is CSS background-image, update to:
 
 background-color: #FFFFFF;
 background-image:
-  linear-gradient(to right, rgba(29,78,216,0.10) 1px, transparent 1px),
-  linear-gradient(to bottom, rgba(29,78,216,0.10) 1px, transparent 1px),
-  linear-gradient(to right, rgba(29,78,216,0.05) 1px, transparent 1px),
-  linear-gradient(to bottom, rgba(29,78,216,0.05) 1px, transparent 1px);
+  linear-gradient(to right, rgba(15,23,42,0.08) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(15,23,42,0.08) 1px, transparent 1px),
+  linear-gradient(to right, rgba(15,23,42,0.04) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(15,23,42,0.04) 1px, transparent 1px);
 background-size:
   120px 120px,
   120px 120px,
   24px 24px,
   24px 24px;
 
-If grid is implemented in a <canvas> or library setting, update its grid color config accordingly (but do not change logic).
+Notes:
+- This yields gray grid (using slate/ink black at low opacity).
+- If still too dark, reduce to 0.06 / 0.03.
+- If too light, increase slightly to 0.10 / 0.05 (but do NOT exceed 0.10).
 
-B3) CANVAS SURFACE SHADOW (SUBTLE)
-- box-shadow: 0 6px 18px rgba(15, 43, 91, 0.10);
-- Keep padding/margins as-is.
-
-========================================================
-C) TITLE BAR / TOGGLE (ONLY IF NEEDED)
-========================================================
-If Editor/Executions toggle is currently faint or blends in:
-- Add a subtle container background: #F3F7FF
-- Border: 1px solid #D6E4FF
-- Height: 28px, font-size 12px
-- Active tab background: #FFFFFF, text: #0F172A
-
-Do NOT move toggle location in this prompt.
+Also ensure the canvas surface does NOT have thick border:
+- border: 1px solid #D6E4FF OR border: none;
+- border-radius: 0 !important;
 
 ========================================================
-D) IMPLEMENTATION DETAILS
+2) BOT LIBRARY TITLE + COUNT ALIGNMENT
 ========================================================
-1) Find CSS files controlling:
-- Bot library panel (left)
-- Bot cards
-- Canvas wrapper / canvas element
+Fix header layout:
+- “BOT LIBRARY” left aligned
+- Count “2” aligned on same baseline to the right of title (or as a chip)
+- No odd spacing / wrapping.
 
-2) Add/adjust classes if necessary:
-- .botLibraryPanel
-- .botLibraryHeader
-- .botCard
-- .botIcon
-- .canvasSurface
+Implement header as a flex row:
+.botLibraryHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 
-3) Ensure there are no global overrides like:
-- border: 4px solid #000
-- border-radius on all panels
+If count is currently plain text, convert to a small chip:
+.botCountChip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  background: #E8F0FF;
+  border: 1px solid #D6E4FF;
+  color: #1D4ED8;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+IMPORTANT:
+- Do NOT change the data source of the count; only wrap/stylize.
+- Ensure no extra margin pushing the count down (reset margin: 0).
 
 ========================================================
-E) OUTPUT REQUIRED
+3) ADD DIVIDER LINE IN LEFT PANEL (BETWEEN HEADER AREA AND LIST AREA)
+========================================================
+We want a clear separator line after:
+- Title + subtitle (“Drag bots onto canvas…”) + search box
+and before the bot list cards.
+
+Add:
+.botLibraryDivider {
+  height: 1px;
+  background: #D6E4FF;
+  margin: 10px 0 10px 0;   (tight)
+}
+
+Place divider in markup (preferred) right before the list container.
+If markup change is risky, apply border-top to the list container:
+.botListContainer { border-top: 1px solid #D6E4FF; padding-top: 10px; }
+
+========================================================
+4) REDUCE SPACE: TITLE BAR + LEFT/CANVAS SECTION
+========================================================
+Goal: tighter, more professional density.
+
+A) Reduce overall top padding/margins:
+- The main content wrapper below title bar should start closer to top.
+Example:
+.mainContainer { padding-top: 10px; }  (reduce if currently 20–30)
+
+B) Reduce left panel internal spacing:
+- header spacing tighter:
+.botLibraryPanel { padding: 12px; } (reduce if larger)
+- search input margin-bottom: 8px
+- bot cards gap: 10px (not 16+)
+
+C) Reduce gap between left panel and canvas:
+- If using CSS grid/flex with gap, set:
+.layoutGrid { gap: 12px; }  (or 10px)
+
+D) Canvas padding:
+- Keep a small inner padding only if required, else 0.
+.canvasSurface { padding: 0; }
+
+========================================================
+5) TITLE BAR / WINDOW TOP AREA — ADD BACKGROUND + FONT COLOR
+========================================================
+We want the top header strip behind “Workflow Creator” + Editor/Executions to feel like an app header.
+
+Apply:
+- Background: linear-gradient(180deg, #0B1F3A 0%, #0A2A52 100%)  (fintech navy)
+- Text: #FFFFFF or #EAF2FF for secondary
+- Height: ~44px (not tall)
+
+Example CSS:
+.appTitleBar {
+  background: linear-gradient(180deg, #0B1F3A 0%, #0A2A52 100%);
+  color: #FFFFFF;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+}
+
+.appTitleBar .title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #FFFFFF;
+}
+
+appTitleBar icons/buttons (minimize/close area) must remain visible:
+- If they are OS-native and can’t be styled, do NOT break them.
+- If they are HTML buttons, set their icon color to #EAF2FF and hover bg to rgba(255,255,255,0.10).
+
+Also tighten spacing between title bar and content:
+- Content wrapper margin-top: 8px (not 20+)
+
+========================================================
+6) OUTPUT REQUIRED
 ========================================================
 Return:
-- Unified diff (patch)
-- List of files modified
-- Checklist confirming:
-  [ ] No dots/bullets
-  [ ] Icons visible for each bot
-  [ ] Left panel has tinted background and header differentiation
-  [ ] Canvas square corners
-  [ ] No black border
-  [ ] Grid clearly visible in light ink-blue
+1) Unified diff patch
+2) Files changed
+3) Checklist:
+  [ ] Grid is thinner + lighter gray, still visible
+  [ ] BOT LIBRARY + count aligned on one row
+  [ ] Divider line added between header/search and bot list
+  [ ] Reduced spacing: title bar + left/canvas + gaps
+  [ ] Title bar has background + readable font colors (fintech navy)
+
+IMPLEMENTATION INSTRUCTIONS
+- Locate and edit the CSS file(s) currently controlling: title bar, bot library panel, canvas background/grid.
+- If needed, add minimal wrapper classes in the HTML/JSX templates ONLY for styling hooks (no logic changes).
+- Avoid inline styles; prefer CSS classes.
+
+NOW APPLY THESE CHANGES AND PROVIDE THE PATCH.
