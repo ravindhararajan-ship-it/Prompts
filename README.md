@@ -1,356 +1,324 @@
-BUGFIX: POPUP "Validate" APPEARS WHEN SWITCHING BETWEEN EXECUTIONS AND EDITOR
-
-STRICT RULES
-- Do NOT change business logic.
-- Do NOT change workflow execution logic.
-- UI-only fix.
-
-DIAGNOSE FIRST
-1) Search the UI code for anything that can create a popup/modal:
-   - <dialog
-   - window.open(
-   - alert(
-   - confirm(
-   - prompt(
-   - showModal / showDialog
-   - Modal / Dialog components named Validate*
-   - state variables like: isValidateOpen, showValidate, validationModalOpen, openValidateDialog
-2) Identify the exact component and state that causes the popup.
-Output the file path + line numbers.
-
-FIX
-A) Ensure switching tabs NEVER opens validation UI:
-- In the tab switch handler, explicitly close validation UI state:
-  - set showValidate = false
-  - set isValidateOpen = false
-  - if HTMLDialogElement is used, call dialogRef.current?.close()
-
-B) If a <dialog> is used:
-- Make sure it is NOT rendered with "open" set to true by default.
-- Ensure it is only opened by an explicit Validate action (but Validate is being removed, so default must be closed).
-
-C) Since Validate is no longer required in Editor:
-- Remove the Validate dialog/modal component from render entirely OR guard it behind a feature flag that is OFF.
-- Make sure no effect hook runs validation automatically on tab change.
-
-VERIFY
-- Click Editor → Executions → Editor multiple times.
-- Confirm no popup appears.
-
-DELIVERABLE
-- Unified diff only
-- List changed files
-- Short explanation of what was causing the popup and how you prevented it
-
-
-FEATURE: EXECUTION CONSOLE MUST UPDATE ASYNCHRONOUSLY (POLL EVERY 3 SECONDS)
+UI REFACTOR — MOVE EDITOR / EXECUTIONS TO TITLE BAR CENTER
 
 GOAL
-While an execution is running, the console UI should fetch new output every 3 seconds and append it.
-When execution completes, polling stops.
+Move the Editor / Executions toggle into the title bar area and center it horizontally, similar to modern workflow tools.
 
 STRICT RULES
-- DO NOT change bot execution behavior (.bat/runner.py).
-- DO NOT change workflow ordering/runner logic.
-- Only add read-only “get latest output” plumbing + UI polling.
-- Do not introduce websockets unless already present.
-
-STEP 1 — FIND WHERE OUTPUT IS STORED
-Locate how execution output is currently captured:
-- in-memory buffer?
-- log file path?
-- database?
-- stdout stream stored in a variable?
-
-Identify:
-- executionId (or current run identifier)
-- current stored output text (or log file path)
-- any existing function/API used to get output
-
-STEP 2 — ADD A READ-ONLY FETCH METHOD (MINIMAL)
-Implement ONE of these, depending on architecture:
-
-A) If output is stored in memory:
-- create a function/endpoint: getExecutionOutput(executionId, cursor)
-- returns: { textChunk, nextCursor, isRunning }
-Cursor can be an integer index (string length) or line count.
-
-B) If output is written to a log file:
-- create a function/endpoint: tailExecutionLog(executionId, cursor)
-- reads only new bytes since cursor
-- returns: { textChunk, nextCursor, isRunning }
-
-Important:
-- DO NOT change how logs are written.
-- Only read logs.
-
-STEP 3 — UI POLLING LOOP (EVERY 3000ms)
-In the Executions tab console component:
-- Maintain state:
-  - consoleText (string)
-  - cursor (number)
-  - isPolling (boolean)
-- When Run starts (or when execution enters running state):
-  - start a setInterval every 3000ms
-  - call the fetch method with current cursor
-  - append textChunk to consoleText
-  - update cursor = nextCursor
-- Stop polling when:
-  - isRunning becomes false OR status is completed/failed OR user switches away
-
-Ensure:
-- Clear interval on component unmount
-- Clear interval on tab switch
-- Auto-scroll to bottom when new text arrives (unless user scrolled up manually; optional)
-
-STEP 4 — DO NOT DUPLICATE OUTPUT
-Make sure polling appends only new chunks (cursor-based). No full refresh each poll.
-
-DELIVERABLE
-- Unified diff only
-- List changed files
-- Brief note explaining where cursor is stored and how duplicates are avoided
-
-
-
-UI CHANGE — MOVE CLEAR BUTTON INTO CANVAS (BOTTOM RIGHT)
-
-GOAL
-Move the Clear button from the console/header area into the canvas area.
-The button should appear at the bottom-right corner of the canvas only when Bots exist.
-
-STRICT RULES
-- Do NOT modify workflow logic.
-- Do NOT modify drag/drop behavior.
+- Do NOT change tab switching logic.
 - Do NOT modify execution logic.
-- UI layout + styling only.
+- Layout + CSS only.
 
-STEP 1 — REMOVE CLEAR FROM HEADER/CONSOLE
-Locate where the "Clear" button is currently rendered (console toolbar or header).
-Remove it from that location.
+STEP 1 — RESTRUCTURE TITLE BAR
 
-STEP 2 — ADD CLEAR BUTTON INSIDE CANVAS CONTAINER
-Inside the canvas container component (the element that renders the workflow nodes):
+Locate the title bar container where "Workflow Creator" and window controls are rendered.
 
-Add a positioned container for the Clear button.
+Convert it into a 3-zone layout:
 
-Example layout structure:
+TitleBar
+  LeftSection      → Workflow Creator title
+  CenterSection    → Editor / Executions toggle
+  RightSection     → window controls + run status
 
-CanvasWrapper
-  CanvasSurface
-  ClearButtonOverlay
+CSS:
 
-CanvasWrapper CSS:
-position: relative;
-height: 100%;
-width: 100%;
-
-ClearButtonOverlay CSS:
-position: absolute;
-bottom: 16px;
-right: 16px;
-z-index: 50;
-
-STEP 3 — SHOW BUTTON ONLY WHEN BOTS EXIST
-
-Determine if nodes exist using existing state:
-examples:
-nodes.length > 0
-workflowNodes.length > 0
-graph.nodes.length > 0
-
-Render button only if nodes exist.
-
-Example condition:
-{nodes.length > 0 && <ClearButton />}
-
-STEP 4 — BUTTON STYLE (STRICT)
-
-Clear button appearance must follow:
-
-background: #D32F2F;
-color: #FFFFFF;
-border: none;
-border-radius: 0;
-padding: 8px 16px;
-font-size: 13px;
-font-weight: 600;
-cursor: pointer;
-
-hover state:
-background: #B71C1C;
-
-No rounded corners.
-Button should look like a flat rectangular destructive action.
-
-STEP 5 — KEEP EXISTING CLEAR LOGIC
-
-The Clear button must call the existing clear/reset workflow handler.
-Do NOT change the handler implementation.
-
-STEP 6 — RESPONSIVENESS
-
-Ensure button remains anchored bottom-right even when:
-- canvas zoom changes
-- nodes move
-- console panel expands
-
-Use absolute positioning relative to canvas wrapper.
-
-DELIVERABLE
-
-Provide:
-1) Unified diff only
-2) Files modified
-3) Confirm button appears only when nodes exist
-
-UI BUGFIX — SUCCESS ICON OVERLAPS OTHER CONTROLS (NODE HEADER ALIGNMENT)
-
-GOAL
-Fix the node status badge (success/check) alignment so it never overlaps the node title, menu icon, or ports/handles.
-
-STRICT RULES
-- Do NOT modify node logic or data.
-- Do NOT modify connections/handles.
-- UI + CSS only.
-
-DIAGNOSE
-1) Locate where the status icon (✅ / success badge) is rendered in the node component.
-2) Identify if it is absolutely positioned or inside the same container as other controls.
-
-FIX REQUIREMENTS
-A) Create a dedicated "header" row inside the node:
-   - left: node title
-   - right: status slot (and any existing header controls like menu icon)
-   Use: display:flex; align-items:center; justify-content:space-between;
-
-B) Status badge placement:
-   - Must be inside the header row (NOT absolute overlay)
-   - Fixed size 18x18 (or 16x16) using inline-flex
-   - margin-left: 8px
-   - flex: 0 0 auto
-   - The title area should be:
-       flex: 1 1 auto;
-       min-width: 0;
-       overflow: hidden;
-       text-overflow: ellipsis;
-       white-space: nowrap;
-
-C) Reserve space:
-   - Ensure header has enough right padding if there are other icons:
-     padding-right: 8px;
-   - If you already have a menu icon, group it with status in a right-side container:
-     <div class="nodeHeaderRight"> [menu] [status] </div>
-
-D) Ensure status never overlaps handles:
-   - Keep handles outside header flow, or ensure the header has z-index lower than handles if needed.
-   - Avoid absolute positioning on the badge.
-
-E) Apply the same alignment for all states (success/warn/error/running).
-
-DELIVERABLE
-- Unified diff only
-- List changed files
-- Confirm badge is no longer absolute-positioned and cannot overlap other controls
-
-UI IMPROVEMENT — MOVE EDITOR / EXECUTIONS TO RIGHT SIDE + FLAT STYLE
-
-GOAL
-Move the Editor / Executions segmented toggle to the right side of the header.
-Remove rounded corners and add a visible background so it looks like a toolbar control.
-
-STRICT RULES
-- Do NOT modify business logic.
-- Do NOT modify workflow execution logic.
-- Only change header layout and styles.
-
-STEP 1 — HEADER LAYOUT
-
-Locate the header container for "Workflow Creator".
-
-Restructure header layout:
-
-HeaderRow
-  Left: Title ("Workflow Creator")
-  Right: Toolbar container
-        - Editor / Executions toggle
-        - Running status badge (if present)
-
-Use flex layout:
-
-HeaderRow CSS
+TitleBar
 display: flex;
 align-items: center;
 justify-content: space-between;
-padding: 10px 16px;
+padding: 8px 16px;
+height: 40px;
 
-ToolbarRight CSS
+LeftSection
+flex: 1;
 display: flex;
 align-items: center;
-gap: 12px;
 
-STEP 2 — MOVE SEGMENTED CONTROL
-
-Move the Editor / Executions control into ToolbarRight container.
-
-Do not change tab switching logic.
-
-STEP 3 — REMOVE ROUNDED CORNERS
-
-Editor / Executions toggle must NOT use rounded corners.
-
-Replace existing style.
-
-SegmentContainer CSS
+CenterSection
+flex: 0;
 display: flex;
-border: 1px solid #C8CDD4;
-background: #F2F4F7;
+justify-content: center;
+align-items: center;
+
+RightSection
+flex: 1;
+display: flex;
+justify-content: flex-end;
+align-items: center;
+gap: 10px;
+
+STEP 2 — MOVE TOGGLE
+
+Move the existing Editor / Executions segmented control into CenterSection.
+
+Do not change any event handlers.
+
+STEP 3 — COMPACT N8N STYLE
+
+SegmentContainer
+display: inline-flex;
+background: #EEF2F6;
+border: 1px solid #D0D5DD;
 border-radius: 0;
 overflow: hidden;
+height: 28px;
 
-SegmentButton CSS
-padding: 6px 16px;
-font-size: 13px;
+SegmentButton
+padding: 4px 12px;
+font-size: 12px;
 border: none;
 background: transparent;
+border-right: 1px solid #D0D5DD;
 cursor: pointer;
-border-right: 1px solid #C8CDD4;
 
 SegmentButton:last-child
 border-right: none;
 
-Active tab style:
-
-SegmentButtonActive
-background: #E3E8EF;
+ActiveSegment
+background: #FFFFFF;
 font-weight: 600;
 
-STEP 4 — ADD BACKGROUND BLOCK
+STEP 4 — AVOID WINDOW CONTROL COLLISION
 
-The segmented control must visually stand out.
+Ensure the toggle never overlaps the system window buttons:
 
-Container style:
-
-background: #EEF2F6;
-border: 1px solid #D0D5DD;
-padding: 2px;
-border-radius: 0;
+CenterSection
+position: absolute;
+left: 50%;
+transform: translateX(-50%);
 
 STEP 5 — VERIFY
 
-Ensure:
-- Toggle sits on the right side of header
-- No rounded edges
-- Clear background panel
-- Buttons align with status indicator
+Confirm:
+- Editor / Executions sits centered in title bar
+- Title remains left aligned
+- Window controls stay right aligned
+- Header height remains compact
+
+DELIVERABLE
+- Unified diff only
+- List files modified
+
+
+UI REDESIGN — CONVERT "AVAILABLE BOTS" PANEL INTO ENTERPRISE BOT LIBRARY
+
+GOAL
+Redesign the left sidebar "Available Bots" section to an enterprise-style Bot Library panel with card-based bots, search bar, and improved visual hierarchy.
+
+STRICT RULES
+- DO NOT modify any workflow logic.
+- DO NOT modify drag/drop implementation.
+- DO NOT modify bot execution logic.
+- Only change UI layout and styling of the sidebar.
+
+---------------------------------------------------
+
+STEP 1 — RENAME PANEL HEADER
+
+Change the sidebar header text from:
+
+"Available Bots"
+
+to
+
+"BOT LIBRARY"
+
+Header style:
+
+font-size: 13px
+font-weight: 600
+letter-spacing: 0.04em
+color: #374151
+padding-bottom: 8px
+border-bottom: 1px solid #E5E7EB
+
+---------------------------------------------------
+
+STEP 2 — ADD BOT COUNT
+
+Display number of bots in header.
+
+Example:
+
+BOT LIBRARY (2)
+
+---------------------------------------------------
+
+STEP 3 — ADD SEARCH BAR
+
+Add a search input below the header.
+
+Search field design:
+
+height: 32px
+padding: 6px 10px
+font-size: 13px
+border: 1px solid #D1D5DB
+background: #FFFFFF
+border-radius: 0
+outline: none
+width: 100%
+
+Placeholder text:
+
+"Search bots..."
+
+Focus state:
+
+border-color: #3B82F6
+
+---------------------------------------------------
+
+STEP 4 — CONVERT BOT ITEMS INTO CARDS
+
+Replace current bot list with card layout.
+
+Each bot should appear as a rectangular card.
+
+Card structure:
+
+BotCard
+  BotTitle
+  BotDescription
+  BotFooter
+
+Example content:
+
+Reserve Mining Data
+Fetch reserve mining account details
+
+BOT
+Drag to canvas →
+
+---------------------------------------------------
+
+STEP 5 — CARD STYLING
+
+Card style:
+
+background: #FFFFFF
+border: 1px solid #E5E7EB
+padding: 12px
+margin-bottom: 10px
+border-radius: 0
+
+Add subtle elevation:
+
+box-shadow: 0 1px 2px rgba(0,0,0,0.05)
+
+---------------------------------------------------
+
+STEP 6 — BOT TITLE STYLE
+
+BotTitle
+
+font-size: 14px
+font-weight: 600
+color: #111827
+margin-bottom: 4px
+
+---------------------------------------------------
+
+STEP 7 — BOT DESCRIPTION STYLE
+
+BotDescription
+
+font-size: 12px
+color: #6B7280
+margin-bottom: 6px
+
+---------------------------------------------------
+
+STEP 8 — BOT FOOTER
+
+Footer should contain:
+
+BOT label
+Drag hint
+
+Example layout:
+
+BOT        Drag to canvas →
+
+Footer style:
+
+display: flex
+justify-content: space-between
+font-size: 11px
+color: #9CA3AF
+
+---------------------------------------------------
+
+STEP 9 — ADD BOT ICONS
+
+Add simple icons before bot titles.
+
+Examples:
+
+🧠 Reserve Mining Data
+⚙ Create IMPACS Transaction
+
+Icons should be inline with the title.
+
+---------------------------------------------------
+
+STEP 10 — ADD HOVER EFFECT
+
+When hovering over bot card:
+
+background: #F5F8FF
+border-color: #3B82F6
+cursor: grab
+
+---------------------------------------------------
+
+STEP 11 — SIDEBAR BACKGROUND
+
+Set sidebar background:
+
+background: #F8FAFC
+border-right: 1px solid #E5E7EB
+padding: 16px
+
+---------------------------------------------------
+
+STEP 12 — SIDEBAR WIDTH
+
+Set fixed width:
+
+width: 260px
+
+Ensure the canvas takes the remaining screen width.
+
+---------------------------------------------------
+
+STEP 13 — SCROLL SUPPORT
+
+Enable vertical scroll if bots exceed screen height.
+
+overflow-y: auto
+height: 100%
+
+---------------------------------------------------
+
+STEP 14 — DO NOT TOUCH
+
+The following must remain unchanged:
+
+- drag/drop functionality
+- bot data structure
+- bot execution logic
+- canvas node rendering
+
+Only the sidebar UI must change.
+
+---------------------------------------------------
 
 DELIVERABLE
 
-Provide:
-1) Unified diff only
-2) Files modified
-3) Confirm Editor/Executions are now right-aligned
+Return:
 
-
+1) unified diff
+2) files modified
+3) confirmation that bot drag behavior remains unchanged
 
 
