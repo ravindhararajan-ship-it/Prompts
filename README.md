@@ -1,173 +1,164 @@
-PROMPT — FINTECH UI POLISH v2 (GRID TONE + ALIGNMENT + TITLEBAR + SPACING) — UI ONLY
+PROMPT 1/4 — STABILIZE UI + REMOVE PLACEHOLDERS (NO BUSINESS LOGIC CHANGES)
 
-CONTEXT (CURRENT STATE)
-- Grid is too thick/dark.
-- “BOT LIBRARY” title and count are misaligned.
-- “Drag bots onto canvas…” needs a divider line (left panel) between title area and list area.
-- Too much vertical/inner spacing between title bar, left panel, and canvas.
-- Window/title bar area looks plain (needs background + font color update).
+ROLE: You are a senior UI engineer. You MUST only change UI/layout/styles. Do NOT change workflow execution logic, bot logic, backend calls, JSON schema, or file formats. If you need data, reuse existing state/props exactly.
 
-STRICT RULES
-- CSS/UI only. Do NOT change business logic, drag/drop logic, canvas logic, execution logic, or polling logic.
-- Do NOT rename existing IDs/classes referenced by JS. You may ADD wrapper classes if necessary.
-- Return: unified diff + files changed + checklist.
+GOAL:
+Fix the current “unfinished” look:
+- Remove the two large empty rectangles in the title bar (broken placeholders).
+- Reduce title/header height to reclaim canvas space.
+- Make Editor/Executions tabs visually anchored to the header, with clear active/inactive styling.
+- Add a subtle separator line between header and content.
 
-========================================================
-1) GRID — TONE DOWN BUT CLEARLY VISIBLE
-========================================================
-Wherever canvas grid background is defined (CSS background-image OR library grid config):
+DO THIS:
+1) FIND the top-level window layout component(s):
+   - search for: "Workflow Creator", "Editor", "Executions", "titlebar", "header", "topbar", "toolbar", "tabs"
+   - identify where the two empty rectangles are created (likely placeholder divs/panels).
+   - REMOVE those placeholder containers entirely (not hidden—deleted) OR replace with real minimal header content (title left, tabs center/right).
 
-TARGET LOOK:
-- Thin, light gray lines (not blue), still visible.
-- Two-layer grid: minor + major. Minor subtle, major slightly stronger.
-- Ensure line thickness is 1px only.
+2) Implement a single, clean header structure:
+   - Left: app title “Workflow Creator”
+   - Center: tabs (Editor, Executions)
+   - Right: window controls remain as-is (do not break native window buttons)
+   - Header height target: 44–52px (compact)
 
-If grid is CSS background-image, update to:
+3) Tabs rules:
+   - Tabs must NOT float in content space.
+   - They must sit inside the header on the same row.
+   - Active tab: solid background, high contrast label
+   - Inactive: transparent/low-contrast
+   - No rounded corners (square/enterprise look)
 
-background-color: #FFFFFF;
-background-image:
-  linear-gradient(to right, rgba(15,23,42,0.08) 1px, transparent 1px),
-  linear-gradient(to bottom, rgba(15,23,42,0.08) 1px, transparent 1px),
-  linear-gradient(to right, rgba(15,23,42,0.04) 1px, transparent 1px),
-  linear-gradient(to bottom, rgba(15,23,42,0.04) 1px, transparent 1px);
-background-size:
-  120px 120px,
-  120px 120px,
-  24px 24px,
-  24px 24px;
+4) Add a subtle divider below header:
+   - 1px line, light gray (or themed color if theme exists)
+   - full width
 
-Notes:
-- This yields gray grid (using slate/ink black at low opacity).
-- If still too dark, reduce to 0.06 / 0.03.
-- If too light, increase slightly to 0.10 / 0.05 (but do NOT exceed 0.10).
+OUTPUT:
+- List the exact files you modified (paths).
+- Provide the exact code changes (diff-style or full updated components).
+- Confirm explicitly: “No business logic changed.”
 
-Also ensure the canvas surface does NOT have thick border:
-- border: 1px solid #D6E4FF OR border: none;
-- border-radius: 0 !important;
 
-========================================================
-2) BOT LIBRARY TITLE + COUNT ALIGNMENT
-========================================================
-Fix header layout:
-- “BOT LIBRARY” left aligned
-- Count “2” aligned on same baseline to the right of title (or as a chip)
-- No odd spacing / wrapping.
 
-Implement header as a flex row:
-.botLibraryHeaderRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
+PROMPT 2/4 — BOT LIBRARY PANEL POLISH + ALIGNMENT + DIVIDERS
 
-If count is currently plain text, convert to a small chip:
-.botCountChip {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  background: #E8F0FF;
-  border: 1px solid #D6E4FF;
-  color: #1D4ED8;
-  border-radius: 999px;
-  line-height: 1;
-}
+ROLE: UI/UX + front-end engineer. UI-only changes. Do NOT modify backend/execution.
 
-IMPORTANT:
-- Do NOT change the data source of the count; only wrap/stylize.
-- Ensure no extra margin pushing the count down (reset margin: 0).
+GOAL:
+Make left “BOT LIBRARY” look like a real tool panel:
+- Align “BOT LIBRARY” title and count “2” on the same baseline (count as a badge).
+- Add a divider line between the title row and the instruction text.
+- Add a subtle background to the sidebar so it’s distinct from the canvas.
+- Fix card spacing and alignment, including “Drag to canvas →” positioning.
+- Ensure icons are visible (no missing icons). If icons are SVG/font-based, fix CSS color/size so they render.
 
-========================================================
-3) ADD DIVIDER LINE IN LEFT PANEL (BETWEEN HEADER AREA AND LIST AREA)
-========================================================
-We want a clear separator line after:
-- Title + subtitle (“Drag bots onto canvas…”) + search box
-and before the bot list cards.
+DO THIS:
+1) Sidebar container:
+   - Apply a slightly tinted background (fintech friendly): very light blue-gray.
+   - Add right-side divider (1px) to separate from canvas.
+   - Reduce excessive padding/empty space.
 
-Add:
-.botLibraryDivider {
-  height: 1px;
-  background: #D6E4FF;
-  margin: 10px 0 10px 0;   (tight)
-}
+2) Title row:
+   - Structure as a flex row: [BOT LIBRARY] [badge count]
+   - Badge style: small pill or square badge, subtle fill, readable contrast
+   - Remove any stray dot/bullet near the title (user asked “Remove DOT.”)
 
-Place divider in markup (preferred) right before the list container.
-If markup change is risky, apply border-top to the list container:
-.botListContainer { border-top: 1px solid #D6E4FF; padding-top: 10px; }
+3) Instruction text:
+   - Place directly under title row
+   - Add divider line above or below it (thin 1px)
+   - Reduce font size slightly; keep it readable
 
-========================================================
-4) REDUCE SPACE: TITLE BAR + LEFT/CANVAS SECTION
-========================================================
-Goal: tighter, more professional density.
+4) Bot cards:
+   - Standardize card height, padding, and spacing
+   - Make truncation consistent (ellipsis)
+   - Left accent bar consistent color
+   - “BOT” label and “Drag to canvas →” aligned on one row at the bottom of card
+   - Ensure hover/focus styles look polished (slight elevation or border highlight)
 
-A) Reduce overall top padding/margins:
-- The main content wrapper below title bar should start closer to top.
-Example:
-.mainContainer { padding-top: 10px; }  (reduce if currently 20–30)
+5) Scroll behavior:
+   - Bot list area must scroll properly if more bots appear.
+   - Always-visible scrollbar preferred (or at least shows on hover). Ensure it’s not broken by overflow hidden on parent containers.
 
-B) Reduce left panel internal spacing:
-- header spacing tighter:
-.botLibraryPanel { padding: 12px; } (reduce if larger)
-- search input margin-bottom: 8px
-- bot cards gap: 10px (not 16+)
+OUTPUT:
+- Files changed + diffs.
+- Confirm “No business logic changed.”
 
-C) Reduce gap between left panel and canvas:
-- If using CSS grid/flex with gap, set:
-.layoutGrid { gap: 12px; }  (or 10px)
 
-D) Canvas padding:
-- Keep a small inner padding only if required, else 0.
-.canvasSurface { padding: 0; }
 
-========================================================
-5) TITLE BAR / WINDOW TOP AREA — ADD BACKGROUND + FONT COLOR
-========================================================
-We want the top header strip behind “Workflow Creator” + Editor/Executions to feel like an app header.
+PROMPT 3/4 — CANVAS: GRID VISIBILITY + CLEAN BORDERS + NO ROUNDED CORNERS
 
-Apply:
-- Background: linear-gradient(180deg, #0B1F3A 0%, #0A2A52 100%)  (fintech navy)
-- Text: #FFFFFF or #EAF2FF for secondary
-- Height: ~44px (not tall)
+ROLE: Front-end UI engineer. UI only.
 
-Example CSS:
-.appTitleBar {
-  background: linear-gradient(180deg, #0B1F3A 0%, #0A2A52 100%);
-  color: #FFFFFF;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-}
+GOAL:
+Fix canvas “plain / unfinished” issues:
+- Canvas must NOT have rounded corners.
+- Remove any thick/black border.
+- Add a clearly visible but subtle grid (not too dark/thick). User wants lighter ink-blue or gray.
+- Add a subtle boundary between sidebar and canvas (divider/shadow).
+- Ensure canvas fills available space (no huge wasted margins).
 
-.appTitleBar .title {
-  font-weight: 700;
-  font-size: 14px;
-  color: #FFFFFF;
-}
+DO THIS:
+1) Canvas container:
+   - Set square corners (border-radius: 0)
+   - Border: 1px subtle (light gray) OR none if grid edge is enough
+   - Background: near-white with grid overlay
 
-appTitleBar icons/buttons (minimize/close area) must remain visible:
-- If they are OS-native and can’t be styled, do NOT break them.
-- If they are HTML buttons, set their icon color to #EAF2FF and hover bg to rgba(255,255,255,0.10).
+2) Grid implementation:
+   - Use CSS background with repeating-linear-gradient (or existing grid if present)
+   - Grid lines: thin (1px), low opacity
+   - Prefer gray-blue tone: e.g. rgba(60, 120, 180, 0.12) OR neutral gray rgba(0,0,0,0.06)
+   - Provide two layers: minor grid (small squares) and major grid (every N squares) slightly stronger but still subtle
+   - IMPORTANT: Fix the prior bug where grid became too dark/thick.
 
-Also tighten spacing between title bar and content:
-- Content wrapper margin-top: 8px (not 20+)
+3) Layout sizing:
+   - Reduce header + outer paddings so canvas is larger.
+   - Canvas should be flush with content area (small consistent padding only).
 
-========================================================
-6) OUTPUT REQUIRED
-========================================================
-Return:
-1) Unified diff patch
-2) Files changed
-3) Checklist:
-  [ ] Grid is thinner + lighter gray, still visible
-  [ ] BOT LIBRARY + count aligned on one row
-  [ ] Divider line added between header/search and bot list
-  [ ] Reduced spacing: title bar + left/canvas + gaps
-  [ ] Title bar has background + readable font colors (fintech navy)
+4) Fix node rendering glitch:
+   - The node’s thick top line must NOT extend past node width.
+   - Locate CSS causing a pseudo-element/underline overflow and constrain it (overflow hidden or correct width calc).
 
-IMPLEMENTATION INSTRUCTIONS
-- Locate and edit the CSS file(s) currently controlling: title bar, bot library panel, canvas background/grid.
-- If needed, add minimal wrapper classes in the HTML/JSX templates ONLY for styling hooks (no logic changes).
-- Avoid inline styles; prefer CSS classes.
+OUTPUT:
+- Files changed + diffs.
+- Confirm “No business logic changed.”
 
-NOW APPLY THESE CHANGES AND PROVIDE THE PATCH.
+
+
+PROMPT 4/4 — FINAL POLISH: HIERARCHY, CONSISTENT SPACING, & VISUAL BUG FIXES
+
+ROLE: UI polish pass. UI only.
+
+GOAL:
+Finish as “standard tool / polished product”:
+- Improve overall hierarchy (header/sidebar/canvas contrast).
+- Ensure consistent spacing across panels and inside cards.
+- Fix any floating dots/ports that look disconnected.
+- Make active states clear (selected bot card, selected node).
+- Ensure Editor/Executions are fully visible (no clipping). Tabs must never be cut off at top.
+
+DO THIS:
+1) Global spacing system:
+   - Define consistent spacing tokens (8/12/16)
+   - Apply to header, sidebar, cards, canvas margins
+
+2) Contrast + typography:
+   - Header background: subtle tinted band (light fintech blue-gray)
+   - Text colors: stronger for titles, medium for secondary text
+   - Make sure labels are readable on the background
+
+3) Ports/dots alignment:
+   - Ensure input/output ports are anchored to node edges
+   - Remove any “floating dot” artifacts by fixing absolute positioning or transform math
+   - Do not change connection logic; only CSS/positioning
+
+4) Selected states:
+   - Selected bot card: clear highlight (border + subtle background)
+   - Selected node: highlight outline/shadow (no neon)
+
+5) Tab visibility/clipping:
+   - Ensure header has enough padding and z-index
+   - Tabs must be centered and fully visible across window sizes
+   - Fix any overflow hidden that clips them
+
+OUTPUT:
+- Files changed + diffs.
+- Confirm “No business logic changed.”
