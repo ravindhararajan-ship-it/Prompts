@@ -1,54 +1,100 @@
-BUGFIX — AVAILABLE BOTS SCROLLBAR STILL VISIBLE
-
+========================
+PROMPT 1 — FIX TOP ROW ALIGNMENT (TABS + TOOLBAR SAME ROW)
+========================
 TASK
-Fix the Available Bots sidebar so:
-- scrolling works
-- NO vertical scrollbar is visible
-- NO horizontal scrollbar appears
-- the sidebar does not show a bottom horizontal scroll strip
+Align the Editor/Executions segmented tabs and the toolbar actions into the same single header row.
 
 STRICT RULES
-- DO NOT change business logic
-- DO NOT change drag/drop behavior
-- Only CSS/layout changes in the sidebar
+- Do not change business logic.
+- UI layout/CSS only.
 
-DIAGNOSE FIRST (MANDATORY)
-1) Identify the exact DOM element(s) that are scrolling in the Available Bots panel.
-2) Identify which element is causing any horizontal overflow.
-Output: the element class/id names and CSS overflow settings.
+REQUIREMENTS
+1) Create a single header row container above the canvas area.
+2) Left/Center: Segmented control tabs: [Editor] [Executions]
+3) Right: Action buttons (contextual based on active tab)
+4) Tabs and buttons must be vertically aligned (same baseline) with consistent spacing.
+5) Remove any extra spacing/margins that cause toolbar to drop to another row.
 
-IMPLEMENT FIX
-A) Sidebar wrapper
-- overflow: hidden;
-- min-width: 0;
-- prevent horizontal scrolling
-
-B) Bot list container (ONLY this should scroll)
-- overflow-y: auto;
-- overflow-x: hidden;
-- height: 100%;
-- min-height: 0; (critical for flex layouts)
-- padding-right: 6px; (optional to prevent content touching edge)
-
-C) Hide scrollbar ONLY on bot list container
-- For webkit:
-  .botList::-webkit-scrollbar { width: 0px; height: 0px; }
-- For Firefox:
-  .botList { scrollbar-width: none; }
-- For old Edge/IE (if applicable):
-  .botList { -ms-overflow-style: none; }
-
-D) Ensure correct flex sizing
-If sidebar uses flex column:
-- parent: display:flex; flex-direction:column;
-- header/search: flex: 0 0 auto;
-- list: flex: 1 1 auto; min-height:0;
-
-E) Remove default margins/padding that can create overflow
-- Ensure no child cards exceed width:
-  cards: max-width: 100%; box-sizing: border-box;
+LAYOUT SPEC
+- Header row: display:flex; align-items:center; justify-content:space-between;
+- Tabs container: flex:0 0 auto;
+- Actions container: flex:0 0 auto; display:flex; gap:10px;
 
 DELIVERABLE
-- Unified diff only.
-- Show exactly which element you applied the .botList class to.
-- Confirm: “Only bot list scrolls; sidebar wrapper does not scroll”.
+- Unified diff only
+- List changed files
+
+
+========================
+PROMPT 2 — REMOVE VALIDATE COMPLETELY (BUTTON + VALIDATION SECTION)
+========================
+TASK
+Remove Validate button and remove the Validation section/panel from the Editor tab entirely.
+
+STRICT RULES
+- Do not change workflow logic.
+- If validate handler exists, keep it but do not render any UI that triggers it.
+- UI-only removal.
+
+REQUIREMENTS
+1) Remove/hide Validate button everywhere.
+2) Remove/hide the Validation section (“Run Validate…”, status, etc.) everywhere.
+3) Reclaim vertical space: canvas expands to fill.
+4) Ensure no empty container remains.
+
+DELIVERABLE
+- Unified diff only
+- List changed files
+
+
+========================
+PROMPT 3 — EXECUTIONS TAB: SHOW CANVAS + ONE WINDOWS-CONSOLE FOR ALL OUTPUT
+========================
+TASK
+Redesign the Executions tab to:
+- show the workflow canvas (read-only OK)
+- show ONE combined console output for the entire run
+- remove "Current Execution" panel
+- remove per-bot sections/collapsibles
+- console must look like Windows cmd.exe
+
+STRICT RULES
+- DO NOT change bot execution logic (.bat/runner.py).
+- DO NOT change process invocation.
+- Only change UI rendering of output.
+
+REQUIREMENTS (EXECUTIONS TAB)
+A) Layout
+- Top: Canvas panel (same canvas component; editing disabled is fine)
+- Bottom: Console panel (full width)
+- No left/right split for execution metadata.
+- Remove “Current Execution” table entirely.
+- No separate sections per bot.
+
+B) Console Appearance (Windows cmd)
+- background: #0C0C0C (near-black)
+- text color: #CCCCCC
+- font-family: Consolas, "Lucida Console", monospace
+- font-size: 12px (small)
+- line-height: 1.35
+- hard edges: border-radius: 4px (minimal) or 0 if you prefer cmd style
+- subtle border: 1px solid #2B2B2B
+- padding: 10px
+- selectable text, copyable
+- auto-scroll to bottom while running (keep existing if already present)
+
+C) Controls (top-right of console header, compact)
+- Steps only toggle (default ON)
+- Copy button
+- Clear button
+- Run button stays in the main header row (right aligned), not floating inside console unless already implemented.
+
+D) Output filtering (display only)
+- Steps only ON: show meaningful runner.py lines (timestamps and step keywords)
+- Hide command noise (venv, echo, setlocal, python.exe invocation, C:\ prompt lines)
+- IMPORTANT: Filtering is UI-only; raw output still available internally.
+
+DELIVERABLE
+- Unified diff only
+- List changed files
+- Confirm: “Executions tab shows canvas + single combined console”
