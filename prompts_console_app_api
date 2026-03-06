@@ -1,0 +1,210 @@
+You are a senior .NET engineer.
+
+Generate a COMPLETE .NET 8 Console Application that allows non-technical users to execute APIs in bulk using an input file.
+
+Important constraints:
+- Use only built-in .NET 8 libraries
+- Do NOT use any external NuGet packages
+- Do NOT use Newtonsoft.Json
+- Do NOT use CsvHelper
+- Do NOT use any Excel library
+- Support CSV input only
+- Use System.Text.Json for JSON handling
+- Use HttpClient for API execution
+
+GOAL
+
+Build a generic bulk API executor for business users who need to call APIs repeatedly without writing code.
+
+APPLICATION REQUIREMENTS
+
+1. The application must be written in C# using .NET 8
+2. It must be a Console Application
+3. It must compile and run without any external package installation
+4. No authentication is required
+5. The application must support generic APIs
+6. The input format must be CSV only
+
+USER WORKFLOW
+
+1. User runs the executable
+2. The program prompts the user for:
+   - API endpoint URL
+   - HTTP method (GET, POST, PUT, DELETE)
+   - Path to input CSV file
+   - Optional delay in milliseconds between requests
+3. The program reads the CSV
+4. Each row becomes one API request
+5. The program logs each request and response into a text file
+
+CSV REQUIREMENTS
+
+1. First row contains headers
+2. Each subsequent row contains request data
+3. Each column maps to a JSON property
+4. CSV parsing must be implemented manually using built-in C# code only
+5. Handle basic quoted CSV values safely
+
+Example CSV:
+
+name,email,age,city
+John,john@test.com,25,Dallas
+Jane,jane@test.com,31,Austin
+
+JSON PAYLOAD GENERATION
+
+1. Convert each CSV row into a JSON payload
+2. Support:
+   - flat JSON
+   - nested JSON using dot notation in headers
+
+Example CSV headers:
+
+user.name,user.email,address.city,address.zip
+
+Expected JSON payload:
+
+{
+  "user": {
+    "name": "John",
+    "email": "john@test.com"
+  },
+  "address": {
+    "city": "Dallas",
+    "zip": "75001"
+  }
+}
+
+TYPE HANDLING
+
+When building JSON values:
+- Detect integers
+- Detect decimals
+- Detect booleans
+- Treat empty values as null
+- Otherwise treat as string
+
+API EXECUTION REQUIREMENTS
+
+1. Use HttpClient
+2. Use async/await
+3. For GET and DELETE:
+   - optionally append values as query string if appropriate
+   - or clearly document current behavior
+4. For POST and PUT:
+   - send JSON payload in request body
+5. Continue processing even if one request fails
+
+LOGGING REQUIREMENTS
+
+Write all results to a text file named output_log.txt
+
+Format example:
+
+==================================================
+REQUEST 1
+==================================================
+Timestamp: 2026-03-05 10:15:00
+Method: POST
+Endpoint: https://example/api/create
+
+Payload:
+{
+  "name": "John",
+  "email": "john@test.com"
+}
+
+Response Status:
+200 OK
+
+Response Body:
+{response text here}
+
+For errors:
+
+==================================================
+REQUEST 2
+==================================================
+Timestamp: 2026-03-05 10:15:01
+Method: POST
+Endpoint: https://example/api/create
+
+Payload:
+{payload here}
+
+Response Status:
+500 Internal Server Error
+
+Error:
+{exception or response details}
+
+ERROR HANDLING
+
+1. If the CSV file does not exist, show clear error
+2. If CSV is malformed, log and stop with message
+3. If one API call fails, log the failure and continue with next row
+4. Catch and log exceptions cleanly
+5. Validate method input
+
+PROJECT STRUCTURE
+
+Generate the full code with this structure:
+
+/ApiBulkExecutor
+    Program.cs
+    ApiExecutor.cs
+    CsvReaderService.cs
+    JsonBuilder.cs
+    Logger.cs
+
+IMPLEMENTATION DETAILS
+
+1. Program.cs
+   - Collect user input
+   - Validate input
+   - Call services in order
+
+2. CsvReaderService.cs
+   - Read CSV file using built-in file APIs
+   - Parse header row
+   - Parse each data row
+   - Return rows as Dictionary<string, string>
+
+3. JsonBuilder.cs
+   - Convert each row dictionary into nested object structure
+   - Support dot notation in column names
+   - Serialize using System.Text.Json
+   - Detect primitive types where possible
+
+4. ApiExecutor.cs
+   - Build and send HTTP requests
+   - Handle POST, PUT, GET, DELETE
+   - Return status code and response body
+
+5. Logger.cs
+   - Append formatted logs to output_log.txt
+   - Include request number, payload, status, response, and errors
+
+CODE QUALITY
+
+1. Keep the code simple, readable, and modular
+2. Add comments where needed
+3. Avoid overengineering
+4. Make it production-friendly but easy for a non-technical support team to use
+5. Ensure the code compiles as-is
+
+OUTPUT REQUIRED
+
+Provide all of the following:
+
+1. Full folder structure
+2. Full code for every file
+3. A sample CSV file
+4. Example console usage
+5. Build and run instructions using only dotnet CLI
+
+IMPORTANT
+
+Do not give partial snippets.
+Generate the full working application code.
+Ensure there are no external dependencies.
