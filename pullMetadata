@@ -1,0 +1,88 @@
+SELECT
+    DB_NAME() AS database_name,
+    sch.name AS schema_name,
+    tbl.name AS table_name,
+    col.column_id,
+    col.name AS column_name,
+    typ.name AS data_type,
+    col.max_length,
+    col.precision,
+    col.scale,
+    col.is_nullable,
+    CASE 
+        WHEN pk_col.column_id IS NOT NULL THEN 1 
+        ELSE 0 
+    END AS is_primary_key,
+    pk.name AS primary_key_name,
+    fk.name AS foreign_key_name,
+    ref_sch.name AS referenced_schema_name,
+    ref_tbl.name AS referenced_table_name,
+    ref_col.name AS referenced_column_name,
+    ix.name AS index_name,
+    ix.type_desc AS index_type,
+    ix.is_unique,
+    ix.is_primary_key AS index_is_primary_key,
+    ix.is_unique_constraint,
+    CASE
+        WHEN fk.name IS NOT NULL THEN
+            sch.name + '.' + tbl.name + '.' + col.name
+            + ' -> ' +
+            ref_sch.name + '.' + ref_tbl.name + '.' + ref_col.name
+        ELSE NULL
+    END AS relationship_path
+FROM sys.tables tbl
+INNER JOIN sys.schemas sch
+    ON tbl.schema_id = sch.schema_id
+INNER JOIN sys.columns col
+    ON tbl.object_id = col.object_id
+INNER JOIN sys.types typ
+    ON col.user_type_id = typ.user_type_id
+
+-- Primary key info
+LEFT JOIN (
+    SELECT
+        ic.object_id,
+        ic.column_id,
+        i.name,
+        i.index_id
+    FROM sys.indexes i
+    INNER JOIN sys.index_columns ic
+        ON i.object_id = ic.object_id
+       AND i.index_id = ic.index_id
+    WHERE i.is_primary_key = 1
+) pk_col
+    ON col.object_id = pk_col.object_id
+   AND col.column_id = pk_col.column_id
+LEFT JOIN sys.indexes pk
+    ON pk.object_id = pk_col.object_id
+   AND pk.index_id = pk_col.index_id
+
+-- Foreign key info
+LEFT JOIN sys.foreign_key_columns fkc
+    ON col.object_id = fkc.parent_object_id
+   AND col.column_id = fkc.parent_column_id
+LEFT JOIN sys.foreign_keys fk
+    ON fkc.constraint_object_id = fk.object_id
+LEFT JOIN sys.tables ref_tbl
+    ON fkc.referenced_object_id = ref_tbl.object_id
+LEFT JOIN sys.schemas ref_sch
+    ON ref_tbl.schema_id = ref_sch.schema_id
+LEFT JOIN sys.columns ref_col
+    ON fkc.referenced_object_id = ref_col.object_id
+   AND fkc.referenced_column_id = ref_col.column_id
+
+-- Index info
+LEFT JOIN sys.index_columns icx
+    ON col.object_id = icx.object_id
+   AND col.column_id = icx.column_id
+LEFT JOIN sys.indexes ix
+    ON icx.object_id = ix.object_id
+   AND icx.index_id = ix.index_id
+   AND ix.is_hypothetical = 0
+
+WHERE tbl.is_ms_shipped = 0
+ORDER BY
+    sch.name,
+    tbl.name,
+    col.column_id,
+    ix.name;
