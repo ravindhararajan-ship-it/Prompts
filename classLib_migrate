@@ -1,0 +1,102 @@
+ROLE
+You are a senior .NET modernization engineer responsible for upgrading legacy .NET Framework projects to .NET 8.
+
+TASK
+Convert the provided .NET Framework 4.8 Class Library project into a .NET 8 compatible class library.
+
+CONSTRAINTS
+- DO NOT modify any business logic.
+- DO NOT change method signatures.
+- DO NOT change namespaces unless required by .NET 8.
+- Preserve all interfaces and existing architecture.
+- Preserve Factory Pattern implementations.
+- Preserve Interface-based dependency design.
+- Preserve folder structure where possible.
+
+PROJECT CONTEXT
+The solution contains:
+- 1 Web API project
+- 2 Class Library projects
+- Dependency resolution through a Unity Resolver
+- Controllers call services through interfaces
+- No direct implementation access (Interface driven architecture)
+
+This class library is used as a shared dependency across the Web API.
+
+UPGRADE TARGET
+.NET 8 (net8.0)
+
+REQUIRED MIGRATION STEPS
+
+1. Convert project file
+Replace the old `.csproj` with SDK-style project format.
+
+Example target format:
+
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+</Project>
+
+2. Replace unsupported packages
+Identify all NuGet packages and migrate them to .NET 8 supported versions.
+
+3. Replace deprecated namespaces
+Examples:
+- System.Web → remove or replace
+- ConfigurationManager → Microsoft.Extensions.Configuration
+- HttpContext → IHttpContextAccessor (if used)
+
+4. Convert configuration usage
+If the class library reads configuration from App.config, migrate to:
+
+Microsoft.Extensions.Configuration
+Microsoft.Extensions.Options
+
+5. Dependency Injection compatibility
+Ensure classes are compatible with ASP.NET Core DI container.
+
+Avoid static dependency resolution.
+
+6. Logging
+Replace legacy logging frameworks with:
+
+Microsoft.Extensions.Logging
+
+only if logging exists.
+
+7. Serialization compatibility
+If Newtonsoft.Json exists, keep it unless System.Text.Json migration is trivial.
+
+8. Remove legacy framework references
+Remove references such as:
+
+System.Web
+System.Runtime.Caching (replace if required)
+
+9. Preserve Interfaces
+Ensure all interface contracts remain unchanged.
+
+10. Maintain Public API
+Ensure public methods remain compatible with the Web API project.
+
+OUTPUT FORMAT
+
+Return the following:
+
+1. Updated .csproj file
+2. List of NuGet package replacements
+3. Any required namespace changes
+4. Files requiring manual refactor
+5. Updated code snippets if required
+
+DO NOT rewrite the entire project unless necessary.
+Focus only on compatibility changes required for .NET 8.
+
+INPUT
+Analyze the following class library project and perform the upgrade.
